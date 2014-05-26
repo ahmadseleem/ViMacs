@@ -4,7 +4,7 @@ ViMacs
 Attempt to make Emacs with Evil ( Beautiful and Easy ) by collecting and and creating the best and simplest configuration.
 
 
-![IMAGE](/Vimacs.png)
+![IMAGE](https://raw.githubusercontent.com/ahmadseleem/ViMacs/master/ViMacs.png)
 
 
 # This is a collection from:
