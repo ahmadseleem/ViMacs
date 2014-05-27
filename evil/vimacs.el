@@ -101,6 +101,7 @@
      (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
      (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)))
 
+
 ;; ===========================================================================
 ;; -- General --------------------------
 ;;
@@ -109,7 +110,7 @@
 
 (setq default-directory "~/Documents/" )
 (set-default-font "Inconsolata LGC-16") ;(set-default-font "DejaVu Sans Mono-17")
-(menu-bar-mode -1)
+(menu-bar-mode 1)
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
 
@@ -123,7 +124,7 @@
 
 (add-to-list 'default-frame-alist
             '(vertical-scroll-bars . nil))
-            
+
 ;; Backup .............................................
 ;disable backup
 (setq backup-inhibited t)
