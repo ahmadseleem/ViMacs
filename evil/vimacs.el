@@ -12,7 +12,32 @@
 (require 'evil-commands)
 
 
-;; --------------------------------------------------------------------------
+
+;; ===========================================================================
+;; -- Reload Emacs Config - without restarting ------------
+;;
+
+(defun edit-dot-emacs ()
+  "Load the .emacs file into a buffer for editing."
+  (interactive)
+  (find-file "~/.emacs.d/evil/vimacs.el"))
+
+;; TODO ... doesn't work yet
+(defun reload-dot-emacs ()
+  "Save .emacs, if it is in a buffer, and reload it."
+  (interactive)
+  (if (bufferp (get-file-buffer "~/.emacs"))
+    (save-buffer (get-buffer "~/.emacs")))
+  (load-file "~/.emacs"))
+
+;; TODO ... doesn't work yet
+(defun reload-vimacs ()
+  "Save .emacs, if it is in a buffer, and reload it."
+  (interactive)
+  (if (bufferp (get-file-buffer "~/.emacs.d/evil/vimacs.el"))
+    (save-buffer (get-buffer "~/.emacs.d/evil/vimacs.el")))
+  (load-file "~/.emacs.d/evil/vimacs.el"))
+
 
 ; some keymaps from ~/.vimrc
 (define-key evil-normal-state-map ",w" 'save-buffer) ; save
