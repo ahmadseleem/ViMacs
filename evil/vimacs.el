@@ -156,16 +156,12 @@
 ;; --------------------------------------------------------------------------
 
 ;; Tab Settings
-;(setq-default indent-tabs-mode nil)
-;
-;(setq-default tab-width 2)
-;(setq c-basic-indent 2)
-;(setq css-basic-indent 2)
+;; No tabs! - spaces only .........................................
+(setq indent-tabs-mode nil)
+(setq tab-width 2)
+(setq c-basic-indent 2)
 
-;(setq tab-width 2)
-;
-;; indent ........................
-
+;; indent .........................................................
 (require 'indent-guide)
 (indent-guide-global-mode)
 (setq indent-guide-char "∙")
