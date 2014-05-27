@@ -5,10 +5,15 @@ ViMacs
 
 An Attempt to make Emacs with Evil ( Beautiful and Easy ) by collecting and and creating the best and simplest configuration.
 
-## If you Emacs Lisp well you can maintain this project or contribute…
+
+### If you Emacs Lisp well you can maintain this project or contribute…
 ## Let’s make Emacs beautiful and easy…
 
 ![IMAGE](https://raw.githubusercontent.com/ahmadseleem/ViMacs/master/ViMacs.png)
+
+
+### to get ready you can use my .emacs file from here:
+https://gist.github.com/ahmadseleem/9ffd9535c017ea84a360
 
 
 # This is a collection from:
