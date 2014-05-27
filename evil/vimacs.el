@@ -227,11 +227,12 @@ This command is convenient when reading novel, documentation."
     " *  "
     ;'mode-line-buffer-identification
     ;; directory and buffer/file name
-    `(:eval (shorten-directory default-directory 20))
+    ;;`(:eval (shorten-directory default-directory 20))
     `(:propertize "%b" face mode-line-filename-face)
-    "   * "
+    "  * "
     " ( " ;; '%02' to set to 2 chars at least; prevents flickering
-      "%p" " :" "%02l" ":" "%02c"
+      ;;"%p" " :" "%02l" ":" "%02c"
+      "%02l" ", " "%02c"
     " ) "
     ))
 
@@ -242,7 +243,7 @@ This command is convenient when reading novel, documentation."
         (output ""))
     (when (and path (equal "" (car path)))
       (setq path (cdr path)))
-    (while (and path (< (length output) (- max-length 4)))
+    (while (and path (< (length output) (- max-length 2)))
       (setq output (concat (car path) "/" output))
       (setq path (cdr path)))
     (when path
@@ -333,7 +334,7 @@ This command is convenient when reading novel, documentation."
   (interactive "<R><x>")
   (evil-delete-whole-line beg end type ?_ yank-handler))
 
-;; paste: before
+;; paste: after
 (defun evil-destroy-paste-after ()
   (interactive)
   (without-evil-mode
