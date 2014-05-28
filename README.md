@@ -15,6 +15,8 @@ An Attempt to make Emacs with Evil ( Beautiful and Easy ) by collecting and and 
 ### To get ready you can use my .emacs file from here:
 https://gist.github.com/ahmadseleem/9ffd9535c017ea84a360
 
+#### Personal customization currently under:
+/evil/vimacs.el
 
 # This is a collection from:
 - Evil-mode: https://gitorious.org/evil/pages/Home
