@@ -34,6 +34,9 @@ https://gist.github.com/ahmadseleem/9ffd9535c017ea84a360
 - Beatifull Emacs.
 - To polish some few modes of Emacs for development purposes.
 
+# How to use ViMacs ( Emacs + Evil + more...):
+-
+
 # TODO:
 - beautify Emacs.
 - beautify Emacs.
