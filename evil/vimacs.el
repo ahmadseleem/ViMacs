@@ -38,6 +38,7 @@
     (save-buffer (get-buffer "~/.emacs.d/evil/vimacs.el")))
   (load-file "~/.emacs.d/evil/vimacs.el"))
 
+
 ;; ===========================================================================
 ;; -- Key - Bindings --------------------------
 ;;
@@ -54,8 +55,8 @@
 (define-key evil-insert-state-map "\C-b" 'evil-backward-char)
 (define-key evil-visual-state-map "\C-b" 'evil-backward-char)
 (define-key evil-normal-state-map "\C-n" 'evil-next-line)
-(define-key evil-insert-state-map "\C-n" 'evil-next-line)
-(define-key evil-visual-state-map "\C-n" 'evil-next-line)
+;(define-key evil-insert-state-map "\C-n" 'evil-next-line)
+;(define-key evil-visual-state-map "\C-n" 'evil-next-line)
 (define-key evil-normal-state-map "\C-p" 'evil-previous-line)
 (define-key evil-insert-state-map "\C-p" 'evil-previous-line)
 (define-key evil-visual-state-map "\C-p" 'evil-previous-line)
