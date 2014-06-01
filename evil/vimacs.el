@@ -107,6 +107,16 @@
 ;; -- General --------------------------
 ;;
 
+(setq
+ tab-always-indent 'complete            ;try to complete before identing
+ show-paren-delay 0
+ )
+
+(setq evil-shift-width 2)
+
+(put 'narrow-to-region 'disabled nil)   ;narrow to region should be enabled by default
+;;
+
 (global-set-key (kbd "C-x f") 'find-file-in-project)
 
 (setq default-directory "~/Documents/" )
@@ -159,11 +169,22 @@
                           (list evt))))))))
 ;; --------------------------------------------------------------------------
 
+;; ................................................................
+;; Auto-indent...
+(add-to-list 'load-path "~/.emacs.d/elpa/auto-indent-mode")
+(require 'auto-indent-mode)
+(auto-indent-global-mode)
+
+(setq auto-indent-assign-indent-level 2) ; => indent level to 2 spaces.
+
 ;; Tab Settings
 ;; No tabs! - spaces only .........................................
 (setq indent-tabs-mode nil)
 (setq tab-width 2)
 (setq c-basic-indent 2)
+(setq css-indent-offset 2)
+(setq html-indent-offset 2)
+(setq haml-indent-offset 2)
 
 ;; indent .........................................................
 (require 'indent-guide)

@@ -116,9 +116,9 @@
 (require 'evil-types)
 (require 'evil-commands)
 (require 'evil-maps)
-(require 'vimacs)
 (require 'undo-tree)
 (require 'evil-rails)
+(require 'vimacs)
 (require 'evil-integration)
 
 (run-hooks 'evil-after-load-hook)
