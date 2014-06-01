@@ -69,10 +69,11 @@
         (string-join " " *textmate-project-roots* )
         ")")))
     (shell-command-to-string
-     (format "open 'peepopen://%s?editor=%s'"
-             (expand-file-name root)
-             (invocation-name)))))
-
+     (format "open 'peepopen://%s?editor=Emacs'"
+             (expand-file-name root)))))
+;     (format "open 'peepopen://%s?editor=%s'"
+;             (expand-file-name root)
+;             (invocation-name)))))
 ;;;###autoload
 (defun peepopen-bind-keys ()
   (cond ((featurep 'aquamacs) (peepopen-bind-aquamacs-keys))

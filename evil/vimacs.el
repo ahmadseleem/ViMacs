@@ -119,6 +119,9 @@
 
 (set-frame-width (selected-frame) 110)
 
+;; Project find ..........................................
+(setq ns-pop-up-frames nil)
+
 ;; New Frame ..........................................
 (add-to-list 'default-frame-alist
              '(font . "Inconsolata LGC-16"))
