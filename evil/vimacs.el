@@ -132,6 +132,12 @@
 ;; Project find ..........................................
 (setq ns-pop-up-frames nil)
 
+;; Vertical ido-mode ..................................
+(add-to-list 'load-path "~/.emacs.d/elpa/ido-vertical-mode")
+(require 'ido-vertical-mode)
+(ido-mode 1)
+(ido-vertical-mode 1)
+
 ;; New Frame ..........................................
 (add-to-list 'default-frame-alist
              '(font . "Inconsolata LGC-16"))
