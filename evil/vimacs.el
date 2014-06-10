@@ -255,18 +255,29 @@ This command is convenient when reading novel, documentation."
   (list
     "  "
     `(vc-mode vc-mode)" "
-    " *  "
+    ;`(:propertize (vc-mode vc-mode) face mode-line-filename-face)
+
+    `(:propertize  ("  * ") face mode-line-filename-face)
     ;'mode-line-buffer-identification
     ;; directory and buffer/file name
     ;;`(:eval (shorten-directory default-directory 20))
-    `(:propertize "%b" face mode-line-filename-face)
-    "  * "
-    " ( " ;; '%02' to set to 2 chars at least; prevents flickering
+    ;`(:propertize "%b" face mode-line-filename-face)
+    `"%b"
+    
+    ;" *  "
+    ;; the current major mode for the buffer.
+    "                       "
+    `(:propertize  ("  # ") face mode-line-filename-face)
+    '"%m"
+    `(:propertize  (" # ") face mode-line-filename-face)
+    ;" ( " ;; '%02' to set to 2 chars at least; prevents flickering
       ;;"%p" " :" "%02l" ":" "%02c"
-      "%02l" ", " "%02c"
-    " ) "
+      ;;"%02l" ", " "%02c"
+    ;" ) "
     ))
 
+        
+        
 ;; Helper function
 (defun shorten-directory (dir max-length)
   "Show up to `max-length' characters of a directory name `dir'."
@@ -287,7 +298,7 @@ This command is convenient when reading novel, documentation."
 (set-face-attribute 'mode-line-filename-face nil
     :inherit 'mode-line-face
     :foreground "#eab700"
-    :weight 'bold)
+    :weight 'normal)
 
 ;; ................................................................
 ;; ;; Git ...
