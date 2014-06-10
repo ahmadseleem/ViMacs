@@ -99,8 +99,8 @@ Semantic, and Ansi-Color faces are included -- and much more...")
    `(whitespace-trailing ((,class (:weight bold :foreground "yellow" :background "red1"))))
 
    ;; Mode line faces
-   `(mode-line ((,class (:box (:line-width 2 :color "#1E3763") :foreground "#85CEEB" :background "#335EA8"))))
-   `(mode-line-inactive ((,class (:box (:line-width 2 :color "#636360") :foreground "#F0F0EF" :background "#9B9C97"))))
+   `(mode-line ((,class (:box (:line-width 2 :color "#335EA8") :foreground "#85CEEB" :background "#335EA8"))))
+   `(mode-line-inactive ((,class (:box (:line-width 2 :color "#9B9C97") :foreground "#F0F0EF" :background "#9B9C97"))))
    `(mode-line-buffer-id ((,class (:weight bold :foreground "white"))))
    `(mode-line-emphasis ((,class (:weight bold :foreground "white"))))
    `(mode-line-highlight ((,class (:foreground "yellow"))))
