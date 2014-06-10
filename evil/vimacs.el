@@ -191,6 +191,13 @@
 (setq css-indent-offset 2)
 (setq html-indent-offset 2)
 (setq haml-indent-offset 2)
+(setq coffee-tab-width 2)
+(custom-set-variables '(coffee-tab-width 2))
+
+;; Coffee-mode .........................................................
+(add-to-list 'load-path "~/.emacs.d/elpa/coffee-mode")
+(require 'coffee-mode)
+ 
 
 ;; indent .........................................................
 (require 'indent-guide)
