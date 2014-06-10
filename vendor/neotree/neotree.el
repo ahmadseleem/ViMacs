@@ -4,7 +4,7 @@
 
 ;; Author: jaypei <jaypei97159@gmail.com>
 ;; URL: https://github.com/jaypei/emacs-neotree
-;; Version: 0.1.4
+;; Version: 0.1.5
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -39,12 +39,12 @@
 ;; Constants
 ;;
 
-(defconst neo-buffer-name "*NeoTree*"
+(defconst neo-buffer-name " *NeoTree*"
   "Name of the buffer where neotree shows directory contents.")
 
 (defconst neo-hidden-files-regexp "^\\."
-  "Hidden files regexp. By default all filest starting with dot '.',
-including . and ..")
+  "Hidden files regexp.
+By default all filest starting with dot '.' including . and ..")
 
 
 ;;
@@ -115,7 +115,7 @@ including . and ..")
 (make-variable-buffer-local 'neo-buffer--start-node)
 
 (defvar neo-buffer--start-line nil
-  "Index of the start line - the root")
+  "Index of the start line of the root.")
 (make-variable-buffer-local 'neo-buffer--start-line)
 
 (defvar neo-buffer--show-hidden-p nil
@@ -133,12 +133,12 @@ including . and ..")
 
 (defvar neotree-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "SPC") 'neo-node-do-enter)
-    (define-key map (kbd "TAB") 'neo-node-do-enter)
-    (define-key map (kbd "RET") 'neo-node-do-enter)
-    (define-key map (kbd "g") 'neotree-refresh)
-    (define-key map (kbd "p") 'previous-line)
-    (define-key map (kbd "n") 'next-line)
+    (define-key map (kbd "SPC")     'neo-node-do-enter)
+    (define-key map (kbd "TAB")     'neo-node-do-enter)
+    (define-key map (kbd "RET")     'neo-node-do-enter)
+    (define-key map (kbd "g")       'neotree-refresh)
+    (define-key map (kbd "p")       'previous-line)
+    (define-key map (kbd "n")       'next-line)
     (define-key map (kbd "C-x C-f") 'find-file-other-window)
     (define-key map (kbd "C-c C-c") 'neo-node-do-change-root)
     (define-key map (kbd "C-c C-f") 'find-file-other-window)
@@ -165,30 +165,54 @@ including . and ..")
 ;;
 
 (defmacro neo-global--with-buffer (&rest body)
+  "Execute the forms in BODY with global neotree buffer."
   (declare (indent 0) (debug t))
-  `(save-current-buffer
-     (switch-to-buffer (neo-global--get-buffer))
+  `(with-current-buffer (neo-global--get-buffer)
      ,@body))
 
 (defun neo-global--window-exists-p ()
+  "Return non-nil if neotree window exists."
   (and (not (null (window-buffer neo-global--window)))
        (eql (window-buffer neo-global--window) (neo-global--get-buffer))))
 
 (defun neo-global--get-window (&optional auto-create-p)
-  (if (not (neo-global--window-exists-p))
-      (setf neo-global--window nil))
-  (if (and (null neo-global--window)
-           auto-create-p)
-      (neo-window--init))
+  "Return the neotree window if it exists, else return nil.
+But when the neotree window is not exists and AUTO-CREATE-P is non-nil,
+it will be auto create neotree window and return it."
+  (unless (neo-global--window-exists-p)
+    (setf neo-global--window nil))
+  (when (and (null neo-global--window)
+             auto-create-p)
+    (neo-window--init))
   neo-global--window)
 
 (defun neo-global--get-buffer ()
+  "Return the global neotree buffer if it exists."
   (if (not (equal (buffer-name neo-global--buffer)
                   neo-buffer-name))
       (setf neo-global--buffer nil))
   (if (null neo-global--buffer)
-      (neo-buffer--create-buffer))
+      (save-window-excursion
+        (neo-buffer--create)))
   neo-global--buffer)
+
+(defadvice delete-other-windows
+  (around neotree-delete-other-windows activate)
+  "Delete all windows except neotree."
+  (interactive)
+  (mapcar (lambda (window)
+	    (if (not (string-equal (buffer-name (window-buffer window)) neo-buffer-name))
+		(delete-window window)))
+	  (cdr (window-list))))
+
+(defadvice mouse-drag-vertical-line
+  (around neotree-drag-vertical-line (start-event) activate)
+  (neo-global--with-buffer
+   (neo-buffer--unlock-width))
+  ad-do-it
+  (neo-global--with-buffer
+   (neo-buffer--lock-width))
+  ad-return-value)
 
 
 ;;
@@ -196,11 +220,11 @@ including . and ..")
 ;;
 
 (defun neo-util--filter (condp lst)
-    (delq nil
-          (mapcar (lambda (x) (and (funcall condp x) x)) lst)))
+  (delq nil
+        (mapcar (lambda (x) (and (funcall condp x) x)) lst)))
 
 (defun neo-util--find (where which)
-  "find element of the list `where` matching predicate `which`"
+  "Find element of the list WHERE matching predicate WHICH."
   (catch 'found
     (dolist (elt where)
       (when (funcall which elt)
@@ -208,7 +232,7 @@ including . and ..")
     nil))
 
 (defun neo-util--make-printable-string (string)
-  "Strip newline character from file names, like 'Icon\n'"
+  "Strip newline character from STRING, like 'Icon\n'."
   (replace-regexp-in-string "\n" "" string))
 
 (defun neo-util--walk-dir (path)
@@ -240,8 +264,9 @@ including . and ..")
      (file-name-directory r-path))))
 
 (defun neo-path--join (root &rest dirs)
-  "Joins a series of directories together, like Python's os.path.join,
-  (neo-path--join \"/tmp\" \"a\" \"b\" \"c\") => /tmp/a/b/c"
+  "Joins a series of directories together with ROOT and DIRS.
+Like Python's os.path.join,
+  (neo-path--join \"/tmp\" \"a\" \"b\" \"c\") => /tmp/a/b/c ."
   (or (if (not dirs) root)
       (let ((tdir (car dirs))
             (epath nil))
@@ -254,8 +279,8 @@ including . and ..")
                (cdr dirs)))))
 
 (defun neo-path--file-short-name (file)
-  "Base file/directory name. Taken from
- http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
+  "Base file/directory name by FILE.
+Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
   (or (if (string= file "/") "/")
       (neo-util--make-printable-string (file-name-nondirectory (directory-file-name file)))))
 
@@ -300,12 +325,21 @@ including . and ..")
 ;; buffer methods
 ;;
 
+(defmacro neo-buffer--save-excursion (&rest body)
+  `(save-window-excursion
+     (let ((rlt nil))
+       (switch-to-buffer (neo-global--get-buffer))
+       (setq buffer-read-only nil)
+       (setf rlt (progn ,@body))
+       (setq buffer-read-only t)
+       rlt)))
+
 (defun neo-buffer--newline-and-begin ()
   (newline)
   (beginning-of-line))
 
 (defun neo-buffer--scroll-to-line (line &optional wind start-pos)
-  "Recommended way to set the cursor to specified line"
+  "Recommended way to set the cursor to LINE."
   (goto-char (point-min))
   (forward-line (1- line))
   (if start-pos (set-window-start wind start-pos)))
@@ -321,20 +355,17 @@ including . and ..")
   (and (not (null neo-buffer--start-node))
        (file-accessible-directory-p neo-buffer--start-node)))
 
-(defun neo-buffer--create-buffer ()
-  (save-excursion
-    (split-window-horizontally)
-    (setq neo-global--buffer
-          (switch-to-buffer
-           (generate-new-buffer-name neo-buffer-name)))
-    (neotree-mode)
-    (setq buffer-read-only t)
-    (delete-window))
+(defun neo-buffer--create ()
+  (setq neo-global--buffer
+        (switch-to-buffer
+         (generate-new-buffer-name neo-buffer-name)))
+  (neotree-mode)
+  (setq buffer-read-only t)
   neo-global--buffer)
 
 (defun neo-buffer--insert-header ()
   (let ((start (point)))
-    (insert "press ? for neotree help")
+    (insert "Press ? for help.")
     (set-text-properties start (point) '(face neo-header-face)))
   (neo-buffer--newline-and-begin))
 
@@ -414,7 +445,7 @@ including . and ..")
          (leafs (cdr contents)))
     (dolist (node nodes)
       (let ((expanded (neo-buffer--expanded-node-p node)))
-        (neo-buffer--insert-dir-entry 
+        (neo-buffer--insert-dir-entry
          node depth expanded)
         (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1)))))
     (dolist (leaf leafs)
@@ -426,7 +457,7 @@ including . and ..")
   (let ((start-node neo-buffer--start-node)
         (ws-wind (selected-window))
         (ws-pos (window-start)))
-    (neo-window--save-excursion
+    (neo-buffer--save-excursion
      (setq neo-buffer--start-line (line-number-at-pos (point)))
      (erase-buffer)
      (neo-buffer--insert-header)
@@ -464,43 +495,44 @@ including . and ..")
         (button-get btn 'neo-full-path)
       default)))
 
+(defun neo-buffer--lock-width ()
+  (setq window-size-fixed 'width))
+
+(defun neo-buffer--unlock-width ()
+  (setq window-size-fixed nil))
+
 
 ;;
 ;; window methods
 ;;
 
-(defmacro neo-window--save-excursion (&rest body)
-  `(save-window-excursion
-     (let ((rlt nil))
-       (switch-to-buffer (neo-global--get-buffer))
-       (setq buffer-read-only nil)
-       (setf rlt (progn ,@body))
-       (setq buffer-read-only t)
-       rlt)))
-
 (defun neo-window--init ()
+  "Create neotree window."
   (select-window (window-at 0 0))
   (split-window-horizontally)
+  (neo-global--with-buffer
+   (neo-buffer--unlock-width))
   (switch-to-buffer (neo-global--get-buffer))
   (if (and (boundp 'linum-mode)         ; disable line number
            (not (null linum-mode)))
       (linum-mode -1))
   (setf neo-global--window (get-buffer-window))
-  (select-window (window-right (get-buffer-window)))
   (neo-window--set-width neo-width)
   (set-window-dedicated-p neo-global--window t)
+  (neo-global--with-buffer
+   (neo-buffer--lock-width))
+  (select-window (window-right (get-buffer-window)))
   neo-global--window)
 
 (defun neo-window--set-width (n)
+  "Make neotree widnow N columns width."
   (let ((w (max n window-min-width))
         (window (neo-global--get-window)))
-    (when (not (null window))
-      (save-selected-window
-        (select-window window)
-        (if (> (window-width) w)
-            (shrink-window-horizontally (- (window-width) w))
-          (if (< (window-width) w)
-              (enlarge-window-horizontally (- w (window-width)))))))))
+    (unless (null window)
+      (if (> (window-width) w)
+          (shrink-window-horizontally (- (window-width) w))
+        (if (< (window-width) w)
+            (enlarge-window-horizontally (- w (window-width))))))))
 
 (defun neo-window--select ()
   (interactive)
@@ -522,14 +554,16 @@ including . and ..")
 
 (defun neo-node-do-enter ()
   (interactive)
-  (neo-window--select)
+  ;(neo-window--select)
   (let ((btn-full-path (neo-buffer--get-filename-current-line)))
-    (when (not (null btn-full-path))
+    (unless (null btn-full-path)
       (if (file-directory-p btn-full-path)
           (progn
             (neo-buffer--toggle-expand btn-full-path)
             (neo-buffer--refresh))
-        (find-file-other-window btn-full-path)))
+	(progn
+	  (switch-to-buffer (other-buffer (current-buffer) 1))
+	 (find-file btn-full-path))))
     btn-full-path))
 
 (defun neo-node-do-change-root ()
@@ -564,7 +598,7 @@ including . and ..")
         (neo-buffer--refresh)
         (find-file-other-window filename))
       (when (and (not is-file)
-                 (yes-or-no-p (format "Do you want to create directory %S ?"
+                 (yes-or-no-p (format "Do you want to create directory %S?"
                                       filename)))
         (mkdir filename)
         (neo-buffer--refresh)))))
@@ -575,19 +609,19 @@ including . and ..")
     (let ((filename (neo-buffer--get-filename-current-line)))
       (if (null filename) (throw 'end nil))
       (if (not (file-exists-p filename)) (throw 'end nil))
-      (if (not (yes-or-no-p (format "Do you really want to delete %S ?"
+      (if (not (yes-or-no-p (format "Do you really want to delete %S?"
                                     filename)))
           (throw 'end nil))
       (if (file-directory-p filename)
           (progn
             (if (neo-path--has-subfile-p filename)
                 (if (yes-or-no-p (format
-                                  "%S is directory, delete it by recursive ?"
+                                  "%S is a directory, delete it recursively?"
                                   filename))
                     (delete-directory filename t))
               (delete-directory filename)))
         (delete-file filename))
-      (message "Delete successed!")
+      (message "%S deleted." filename)
       (neo-buffer--refresh)
       filename)))
 
@@ -605,9 +639,12 @@ including . and ..")
 ;;;###autoload
 (defun neotree-show ()
   (interactive)
-  (if (not (neo-buffer--valid-start-node-p))
-      (neotree-dir (neo-path--get-working-dir))
-    (neo-global--get-window t)))
+  (let ((valid-start-node-p nil))
+    (neo-buffer--save-excursion
+     (setf valid-start-node-p (neo-buffer--valid-start-node-p)))
+    (if (not valid-start-node-p)
+        (neotree-dir (neo-path--get-working-dir))
+      (neo-global--get-window t))))
 
 ;;;###autoload
 (defun neotree-hide ()
@@ -621,7 +658,7 @@ including . and ..")
   (when (and (file-exists-p path)
              (file-directory-p path))
     (neo-global--get-window t)
-    (neo-window--save-excursion
+    (neo-buffer--save-excursion
      (let ((start-path-name (expand-file-name (substitute-in-file-name path))))
        (setq neo-buffer--start-node start-path-name)
        (cd start-path-name))
