@@ -129,7 +129,7 @@
 
 (set-frame-width (selected-frame) 110)
 
-;; Project find ..........................................
+;; Project find .......................................
 (setq ns-pop-up-frames nil)
 
 ;; Vertical ido-mode ..................................
@@ -400,6 +400,9 @@ This command is convenient when reading novel, documentation."
 (define-key evil-normal-state-map "X" 'evil-destroy-whole-line)
 (define-key evil-normal-state-map "Y" 'evil-copy-to-end-of-line)
 (define-key evil-visual-state-map "p" 'evil-destroy-paste-after)
+;;
+;; TODO
+;(define-key evil-insert-state-map [delete] 'evil-destroy) ;; fix - Delete key yank to clipboard!!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; 
 
