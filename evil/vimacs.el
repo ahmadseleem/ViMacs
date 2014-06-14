@@ -183,6 +183,8 @@
 
 (setq auto-indent-assign-indent-level 2) ; => indent level to 2 spaces.
 
+(electric-indent-mode +1)
+
 ;; Tab Settings
 ;; No tabs! - spaces only .........................................
 (setq indent-tabs-mode nil)
