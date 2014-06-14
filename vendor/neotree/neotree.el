@@ -253,6 +253,14 @@ it will be auto create neotree window and return it."
         (setq r-path (expand-file-name r-path current-dir))
         r-path)))
 
+(defun neo-path--shorten (path length)
+  "Shorten a given path to a specified length. This is needed for paths, which
+are to long for the window to display completely. The function cuts of the
+first part of the path to remain the last folder (the current one)."
+    (if (> (string-width path) length)
+	(concat "«" (substring path (- (- length 1))))
+      path))
+
 (defun neo-path--updir (path)
   (let ((r-path (neo-path--expand-name path)))
     (if (and (> (length r-path) 0)
@@ -378,7 +386,7 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
                  'neo-full-path (neo-path--updir neo-buffer--start-node))
   (insert " (up a dir)")
   (neo-buffer--newline-and-begin)
-  (neo-buffer--insert-with-face node
+  (neo-buffer--insert-with-face (neo-path--shorten node (window-body-width))
                         'neo-header-face)
   (neo-buffer--newline-and-begin))
 
@@ -516,6 +524,7 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
   (if (and (boundp 'linum-mode)         ; disable line number
            (not (null linum-mode)))
       (linum-mode -1))
+  (setq truncate-lines -1)
   (setf neo-global--window (get-buffer-window))
   (neo-window--set-width neo-width)
   (set-window-dedicated-p neo-global--window t)
@@ -671,4 +680,4 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
 
 
 (provide 'neotree)
-;;; neotree.el ends here
+;;; neotree.el ends heree
