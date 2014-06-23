@@ -1,21 +1,21 @@
 ViMacs
 ======
 
-### == Use Emacs the Vim way ( but prettier, simpler, faster ).
+#### == Use Emacs the Vim way ( but prettier, simpler, faster ).
 
 > An Attempt to make Emacs with Evil ( Beautiful and Easy ) by collecting and and creating the best and simplest configuration.
 
 
 #### == If you know Emacs Lisp well you can maintain this project or contribute…
-## Let’s make Emacs beautiful and easy…
+### Let’s make Emacs beautiful and easy…
 
 ![IMAGE](https://raw.githubusercontent.com/ahmadseleem/ViMacs/master/ViMacs.png)
 
 
-#### == To get ready you can use my .emacs file from here:
-`https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034`
+##### == To get ready you can use my .emacs file from here:
+https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034
 
-#### == Personal customization currently under:
+##### == Personal customization currently under:
 `/evil/vimacs.el`
 
 #### == This is a collection from:
@@ -23,21 +23,21 @@ ViMacs
 - Prelude: https://github.com/bbatsov/prelude
 - And more collections to polish emacs
 
-#### == Browsing a Project ( two ways ):
+##### == Browsing a Project ( two ways ):
 - TextMate Minor Mode: https://github.com/defunkt/textmate.el
 - Emacs-neotree (like: NerdTree): https://github.com/jaypei/emacs-neotree
 
-### == Our Focus Here:
+#### == Our Focus Here:
 - Use Emacs as cool and easy as used vim.
 - Get the best out Evil-mode.
 - Fix defaults bugs to get it ready as used to use Vim.
 - Beatifull Emacs.
 - To polish some few modes of Emacs for development purposes.
 
-#### == How to use ViMacs ( Emacs + Evil + more...):
+##### == How to use ViMacs ( Emacs + Evil + more...):
 -
 
-#### == TODO:
+##### == TODO:
 - beautify Emacs.
 - beautify Emacs.
 - beautify Emacs.
