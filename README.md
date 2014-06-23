@@ -3,20 +3,20 @@ ViMacs
 
 ### == Use Emacs the Vim way ( but prettier, simpler, faster ).
 
-An Attempt to make Emacs with Evil ( Beautiful and Easy ) by collecting and and creating the best and simplest configuration.
+> An Attempt to make Emacs with Evil ( Beautiful and Easy ) by collecting and and creating the best and simplest configuration.
 
 
-### == If you know Emacs Lisp well you can maintain this project or contribute…
+#### == If you know Emacs Lisp well you can maintain this project or contribute…
 ## Let’s make Emacs beautiful and easy…
 
 ![IMAGE](https://raw.githubusercontent.com/ahmadseleem/ViMacs/master/ViMacs.png)
 
 
 #### == To get ready you can use my .emacs file from here:
-https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034
+`https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034`
 
 #### == Personal customization currently under:
-/evil/vimacs.el
+`/evil/vimacs.el`
 
 #### == This is a collection from:
 - Evil-mode: https://gitorious.org/evil/pages/Home
