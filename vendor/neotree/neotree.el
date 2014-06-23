@@ -57,11 +57,15 @@ By default all filest starting with dot '.' including . and ..")
   :group 'neotree
   :link '(info-link "(neotree)Configuration"))
 
-(defcustom neo-width 25
-  "*If non-nil, neo will change its width to this when it show."
+(defcustom neo-window-width 25
+  "*Specifies the width of the NeoTree window."
   :type 'integer
   :group 'neotree)
 
+(defcustom neo-show-header t
+  "*If non-nil, a help message will be displayed on the top of the window."
+  :type 'boolean
+  :group 'neotree)
 
 ;;
 ;; Faces
@@ -139,6 +143,7 @@ By default all filest starting with dot '.' including . and ..")
     (define-key map (kbd "g")       'neotree-refresh)
     (define-key map (kbd "p")       'previous-line)
     (define-key map (kbd "n")       'next-line)
+    (define-key map (kbd "A")       'neotree-stretch-toggle)
     (define-key map (kbd "C-x C-f") 'find-file-other-window)
     (define-key map (kbd "C-c C-c") 'neo-node-do-change-root)
     (define-key map (kbd "C-c C-f") 'find-file-other-window)
@@ -170,10 +175,22 @@ By default all filest starting with dot '.' including . and ..")
   `(with-current-buffer (neo-global--get-buffer)
      ,@body))
 
+(defmacro neo-global--with-window (&rest body)
+  "Execute the forms in BODY with global neotree window."
+  (declare (indent 0) (debug t))
+  `(save-selected-window
+     (neo-global--select-window)
+     ,@body))
+
 (defun neo-global--window-exists-p ()
   "Return non-nil if neotree window exists."
   (and (not (null (window-buffer neo-global--window)))
        (eql (window-buffer neo-global--window) (neo-global--get-buffer))))
+
+(defun neo-global--select-window ()
+  (interactive)
+  (let ((window (neo-global--get-window t)))
+    (select-window window)))
 
 (defun neo-global--get-window (&optional auto-create-p)
   "Return the neotree window if it exists, else return nil.
@@ -183,8 +200,21 @@ it will be auto create neotree window and return it."
     (setf neo-global--window nil))
   (when (and (null neo-global--window)
              auto-create-p)
-    (neo-window--init))
+    (setq neo-global--window
+          (neo-global--create-window)))
   neo-global--window)
+
+(defun neo-global--create-window ()
+  "Create global neotree window."
+  (let ((window nil)
+        (buffer (neo-global--get-buffer)))
+    (select-window (window-at 0 0))
+    (split-window-horizontally)
+    (setq window (selected-window))
+    (neo-window--init window buffer)
+    (setq neo-global--window window)
+    (select-window (window-right (get-buffer-window)))
+    window))
 
 (defun neo-global--get-buffer ()
   "Return the global neotree buffer if it exists."
@@ -258,7 +288,7 @@ it will be auto create neotree window and return it."
 are to long for the window to display completely. The function cuts of the
 first part of the path to remain the last folder (the current one)."
     (if (> (string-width path) length)
-	(concat "«" (substring path (- (- length 1))))
+	(concat "<" (substring path (- (- length 1))))
       path))
 
 (defun neo-path--updir (path)
@@ -369,6 +399,10 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
          (generate-new-buffer-name neo-buffer-name)))
   (neotree-mode)
   (setq buffer-read-only t)
+  (if (and (boundp 'linum-mode)         ; disable line number
+           (not (null linum-mode)))
+      (linum-mode -1))
+  (setq truncate-lines -1)
   neo-global--buffer)
 
 (defun neo-buffer--insert-header ()
@@ -461,14 +495,14 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
 
 (defun neo-buffer--refresh (&optional line)
   (interactive)
-  (neo-window--select)
+  (neo-global--select-window)
   (let ((start-node neo-buffer--start-node)
         (ws-wind (selected-window))
         (ws-pos (window-start)))
     (neo-buffer--save-excursion
      (setq neo-buffer--start-line (line-number-at-pos (point)))
      (erase-buffer)
-     (neo-buffer--insert-header)
+     (if neo-show-header (neo-buffer--insert-header))
      (neo-buffer--insert-tree start-node 1))
     (neo-buffer--scroll-to-line
      (if line line neo-buffer--start-line)
@@ -514,40 +548,42 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
 ;; window methods
 ;;
 
-(defun neo-window--init ()
-  "Create neotree window."
-  (select-window (window-at 0 0))
-  (split-window-horizontally)
+(defun neo-window--init (window buffer)
+  "Make WINDOW a NeoTree window.
+NeoTree buffer is BUFFER."
   (neo-global--with-buffer
-   (neo-buffer--unlock-width))
-  (switch-to-buffer (neo-global--get-buffer))
-  (if (and (boundp 'linum-mode)         ; disable line number
-           (not (null linum-mode)))
-      (linum-mode -1))
-  (setq truncate-lines -1)
-  (setf neo-global--window (get-buffer-window))
-  (neo-window--set-width neo-width)
-  (set-window-dedicated-p neo-global--window t)
+    (neo-buffer--unlock-width))
+  (switch-to-buffer buffer)
+  (neo-window--set-width window neo-window-width)
+  (set-window-dedicated-p window t)
   (neo-global--with-buffer
-   (neo-buffer--lock-width))
-  (select-window (window-right (get-buffer-window)))
-  neo-global--window)
+    (neo-buffer--lock-width))
+  window)
 
-(defun neo-window--set-width (n)
-  "Make neotree widnow N columns width."
-  (let ((w (max n window-min-width))
-        (window (neo-global--get-window)))
+(defun neo-window--set-width (window n)
+  "Make neotree widnow(WINDOW) N columns width."
+  (let ((w (max n window-min-width)))
     (unless (null window)
       (if (> (window-width) w)
           (shrink-window-horizontally (- (window-width) w))
         (if (< (window-width) w)
             (enlarge-window-horizontally (- w (window-width))))))))
 
-(defun neo-window--select ()
-  (interactive)
-  (let ((window (neo-global--get-window t)))
-    (select-window window)))
+(defun neo-window--zoom (method)
+  (neo-buffer--unlock-width)
+  (cond
+   ((eq method 'maximize)
+    (maximize-window))
+   ((eq method 'minimize)
+    (neo-window--set-width (selected-window) neo-window-width))
+   ((eq method 'zoom-in)
+    (shrink-window-horizontally 2))
+   ((eq method 'zoom-out)
+    (enlarge-window-horizontally 2)))
+  (neo-buffer--lock-width))
 
+(defun neo-window--minimize-p ()
+  (<= (window-width) neo-window-width))
 
 ;;
 ;; Interactive functions
@@ -563,7 +599,7 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
 
 (defun neo-node-do-enter ()
   (interactive)
-  ;(neo-window--select)
+  ;(neo-global--select-window)
   (let ((btn-full-path (neo-buffer--get-filename-current-line)))
     (unless (null btn-full-path)
       (if (file-directory-p btn-full-path)
@@ -577,7 +613,7 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
 
 (defun neo-node-do-change-root ()
   (interactive)
-  (neo-window--select)
+  (neo-global--select-window)
   (let ((btn-full-path (neo-buffer--get-filename-current-line)))
     (if (null btn-full-path)
         (call-interactively 'neotree-dir)
@@ -638,6 +674,13 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
   (interactive)
   (neo-buffer--refresh))
 
+(defun neotree-stretch-toggle ()
+  (interactive)
+  (neo-global--with-window
+   (if (neo-window--minimize-p)
+       (neo-window--zoom 'maximize)
+     (neo-window--zoom 'minimize))))
+
 ;;;###autoload
 (defun neotree-toggle ()
   (interactive)
@@ -680,4 +723,4 @@ Taken from http://lists.gnu.org/archive/html/emacs-devel/2011-01/msg01238.html"
 
 
 (provide 'neotree)
-;;; neotree.el ends heree
+;;; neotree.el ends here

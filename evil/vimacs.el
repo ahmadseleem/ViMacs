@@ -206,6 +206,7 @@
 (indent-guide-global-mode)
 (setq indent-guide-char "∙")
 
+
 ;; ................................................................
 ;; ;; clipboard ...
 (setq make-backup-files nil) ; stop creating those backup~ files
@@ -413,5 +414,12 @@ This command is convenient when reading novel, documentation."
 (autoload 'scss-mode "scss-mode")
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
 (setq scss-compile-at-save nil)
+
+;; 
+;; ................................................................
+;; SCSS Mode...
+(defalias 'xml-mode 'sgml-mode 
+  "Use `sgml-mode' instead of nXML's `xml-mode'.")
+
 
 (provide 'vimacs)
