@@ -22,17 +22,20 @@ https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034
 #### ## Personal customization currently under:
 `/evil/vimacs.el`
 
+-
 
 #### ## This is a collection from:
 - Evil-mode: https://gitorious.org/evil/pages/Home
 - Prelude: https://github.com/bbatsov/prelude
 - And more collections to polish emacs
 
+-
 
 #### ## Browsing a Project ( two ways ):
 - TextMate Minor Mode: https://github.com/defunkt/textmate.el
 - Emacs-neotree (like: NerdTree): https://github.com/jaypei/emacs-neotree
 
+-
 
 #### ## Our Focus Here:
 - Use Emacs as cool and easy as used vim.
@@ -41,6 +44,7 @@ https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034
 - Beatifull Emacs.
 - To polish some few modes of Emacs for development purposes.
 
+-
 
 #### ## How to use ViMacs ( Emacs + Evil + more...):
 -
