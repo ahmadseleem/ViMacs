@@ -6,7 +6,9 @@ ViMacs
 > An Attempt to make Emacs with Evil ( Beautiful and Easy ) by collecting and and creating the best and simplest configuration.
 
 
-#### ## If you know Emacs Lisp well you can maintain this project or contribute…
+#### ** If you know Emacs Lisp well you can maintain this project or contribute…
+
+-
 
 ### Let’s make Emacs beautiful and easy…
 
@@ -18,6 +20,7 @@ ViMacs
 #### ## To get ready you can use my .emacs file from here:
 https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034
 
+-
 
 #### ## Personal customization currently under:
 `/evil/vimacs.el`
@@ -47,8 +50,8 @@ https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034
 -
 
 #### ## How to use ViMacs ( Emacs + Evil + more...):
--
 
+-
 
 #### ## TODO:
 - beautify Emacs.
