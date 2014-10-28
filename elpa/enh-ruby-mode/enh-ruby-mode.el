@@ -167,10 +167,71 @@ the value changes.
 (defconst erm-process-delimiter
   "\n\0\0\0\n")
 
+(define-abbrev-table 'enh-ruby-mode-abbrev-table ()
+  "Abbrev table used by enhanced-ruby-mode.")
+
+(define-abbrev enh-ruby-mode-abbrev-table "end" "end"
+  'indent-for-tab-command :system t)
+
+(defvar enh-ruby-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "{"             'enh-ruby-electric-brace)
+    (define-key map "}"             'enh-ruby-electric-brace)
+    (define-key map (kbd "M-C-a")   'enh-ruby-beginning-of-defun)
+    (define-key map (kbd "M-C-e")   'enh-ruby-end-of-defun)
+    (define-key map (kbd "M-C-b")   'enh-ruby-backward-sexp)
+    (define-key map (kbd "M-C-f")   'enh-ruby-forward-sexp)
+    (define-key map (kbd "M-C-p")   'enh-ruby-beginning-of-block)
+    (define-key map (kbd "M-C-n")   'enh-ruby-end-of-block)
+    (define-key map (kbd "M-C-h")   'enh-ruby-mark-defun)
+    (define-key map (kbd "M-C-q")   'enh-ruby-indent-exp)
+    (define-key map (kbd "C-c C-e") 'enh-ruby-find-error)
+    (define-key map (kbd "C-c C-f") 'enh-ruby-insert-end)
+    (define-key map (kbd "C-c /")   'enh-ruby-insert-end)
+    (define-key map (kbd "M-C-u")   'enh-ruby-up-sexp)
+    (define-key map (kbd "C-j")     'reindent-then-newline-and-indent)
+    map)
+  "Syntax table in use in enh-ruby-mode buffers.")
+
+(defvar enh-ruby-mode-syntax-table
+  (let ((table (make-syntax-table)))
+    (modify-syntax-entry ?\' "\"" table)
+    (modify-syntax-entry ?\" "\"" table)
+    (modify-syntax-entry ?\` "\"" table)
+    (modify-syntax-entry ?#  "<"  table)
+    (modify-syntax-entry ?\n ">"  table)
+    (modify-syntax-entry ?\\ "\\" table)
+    (modify-syntax-entry ?$  "."  table)
+    (modify-syntax-entry ??  "_"  table)
+    (modify-syntax-entry ?_  "_"  table)
+    (modify-syntax-entry ?:  "_"  table)
+    (modify-syntax-entry ?<  "."  table)
+    (modify-syntax-entry ?>  "."  table)
+    (modify-syntax-entry ?&  "."  table)
+    (modify-syntax-entry ?|  "."  table)
+    (modify-syntax-entry ?%  "."  table)
+    (modify-syntax-entry ?=  "."  table)
+    (modify-syntax-entry ?/  "."  table)
+    (modify-syntax-entry ?+  "."  table)
+    (modify-syntax-entry ?*  "."  table)
+    (modify-syntax-entry ?-  "."  table)
+    (modify-syntax-entry ?\; "."  table)
+    (modify-syntax-entry ?\( "()" table)
+    (modify-syntax-entry ?\) ")(" table)
+    (modify-syntax-entry ?\{ "(}" table)
+    (modify-syntax-entry ?\} "){" table)
+    (modify-syntax-entry ?\[ "(]" table)
+    (modify-syntax-entry ?\] ")[" table)
+    table)
+  "Syntax table used by enh-ruby-mode buffers.")
+
 ;;; Mode:
 
+(defalias 'enh-ruby-parent-mode
+  (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
+
 ;;;###autoload
-(define-derived-mode enh-ruby-mode prog-mode "EnhRuby"
+(define-derived-mode enh-ruby-mode enh-ruby-parent-mode "EnhRuby"
   "Enhanced Major mode for editing Ruby code.
 
 \\{enh-ruby-mode-map}"
@@ -190,6 +251,8 @@ the value changes.
   (set (make-local-variable 'parse-sexp-lookup-properties) t)
   (set (make-local-variable 'require-final-newline)        t)
 
+  (set (make-local-variable 'forward-sexp-function) 'enh-ruby-forward-sexp)
+
   (set (make-local-variable 'paragraph-start)
        (concat "$\\|" page-delimiter))
   (set (make-local-variable 'add-log-current-defun-function)
@@ -202,9 +265,6 @@ the value changes.
   (add-hook 'before-save-hook       'enh-ruby-mode-set-encoding nil t)
   (add-hook 'change-major-mode-hook 'erm-major-mode-changed     nil t)
   (add-hook 'kill-buffer-hook       'erm-buffer-killed          nil t)
-
-  (define-abbrev enh-ruby-mode-abbrev-table "end" "end"
-    'indent-for-tab-command :system t)
 
   (when enh-ruby-use-ruby-mode-show-parens-config
     (require 'ruby-mode)
@@ -236,6 +296,11 @@ the value changes.
  (defface enh-ruby-regexp-delimiter-face
    `((t :foreground ,(erm-darken-color font-lock-string-face)))
    "Face used to highlight regexp delimiters like / and %r."
+   :group 'enh-ruby)
+
+ (defface enh-ruby-regexp-face
+   `((t :foreground ,(face-attribute font-lock-string-face :foreground)))
+   "Face used to highlight the inside of regular expressions"
    :group 'enh-ruby)
 
  (defface enh-ruby-op-face
@@ -318,11 +383,10 @@ the value changes.
 
   erm-ruby-process)
 
-(defvar erm-response nil "Private variable.")
-(defvar erm-parsing-p nil "Private variable.")
+(defvar erm-response          nil "Private variable.")
+(defvar erm-parsing-p         nil "Private variable.")
 (defvar erm-no-parse-needed-p nil "Private variable.")
-
-(defvar erm-source-dir nil "Private variable.")
+(defvar erm-source-dir        nil "Private variable.")
 
 (defun erm-source-dir ()
   (or erm-source-dir
@@ -392,65 +456,12 @@ the value changes.
       (enh-ruby-fontify-buffer)
       t))
 
-(defvar enh-ruby-mode-syntax-table nil
-  "Syntax table in use in enh-ruby-mode buffers.")
-
-(if enh-ruby-mode-syntax-table
-    ()
-  (setq enh-ruby-mode-syntax-table (make-syntax-table))
-  (modify-syntax-entry ?\' "\"" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\" "\"" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\` "\"" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?#  "<"  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\n ">"  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\\ "\\" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?$  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ??  "_"  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?_  "_"  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?<  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?>  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?&  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?|  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?%  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?=  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?/  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?+  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?*  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?-  "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\; "."  enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\( "()" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\) ")(" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\{ "(}" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\} "){" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\[ "(]" enh-ruby-mode-syntax-table)
-  (modify-syntax-entry ?\] ")[" enh-ruby-mode-syntax-table))
-
-(defvar enh-ruby-mode-map nil "Keymap used in ruby mode.")
-
 (defun enh-ruby-electric-brace (arg)
   (interactive "P")
   (insert-char last-command-event 1)
   (enh-ruby-indent-line t)
   (delete-char -1)
   (self-insert-command (prefix-numeric-value arg)))
-
-(if enh-ruby-mode-map
-    nil
-  (setq enh-ruby-mode-map (make-sparse-keymap))
-  (define-key enh-ruby-mode-map "{"        'enh-ruby-electric-brace)
-  (define-key enh-ruby-mode-map "}"        'enh-ruby-electric-brace)
-  (define-key enh-ruby-mode-map "\e\C-a"   'enh-ruby-beginning-of-defun)
-  (define-key enh-ruby-mode-map "\e\C-e"   'enh-ruby-end-of-defun)
-  (define-key enh-ruby-mode-map "\e\C-b"   'enh-ruby-backward-sexp)
-  (define-key enh-ruby-mode-map "\e\C-f"   'enh-ruby-forward-sexp)
-  (define-key enh-ruby-mode-map "\e\C-u"   'enh-ruby-up-sexp)
-  (define-key enh-ruby-mode-map "\e\C-p"   'enh-ruby-beginning-of-block)
-  (define-key enh-ruby-mode-map "\e\C-n"   'enh-ruby-end-of-block)
-  (define-key enh-ruby-mode-map "\e\C-h"   'enh-ruby-mark-defun)
-  (define-key enh-ruby-mode-map "\e\C-q"   'enh-ruby-indent-exp)
-  (define-key enh-ruby-mode-map "\C-c\C-e" 'enh-ruby-find-error)
-  (define-key enh-ruby-mode-map "\C-c\C-f" 'enh-ruby-insert-end)
-  (define-key enh-ruby-mode-map "\C-c/"    'enh-ruby-insert-end))
 
 (defun enh-ruby-imenu-create-index-in-block (prefix beg end)
   (let* ((index-alist '())
@@ -581,6 +592,7 @@ modifications to the buffer."
         font-lock-keyword-face
         enh-ruby-heredoc-delimiter-face
         enh-ruby-op-face
+        enh-ruby-regexp-face
         ))
 
 (defun enh-ruby-calculate-indent (&optional start-point)
@@ -802,19 +814,19 @@ With ARG, do it that many times."
   (interactive "^p")
   (unless arg (setq arg 1))
   (while (>= (setq arg (1- arg)) 0)
-    (let* ((pos (enh-ruby-previous-indent-change (point)))
-           (prop (get-text-property pos 'indent))
-           (count 1))
-
-      (while (< 0 (setq count
-                        (cond
-                         ((or (eq prop 'l) (eq prop 'b) (eq prop 'd)) (1- count))
-                         ((or (eq prop 'r) (eq prop 'e)) (1+ count))
-                         (t count))))
-        (setq prop (and (setq pos (enh-ruby-previous-indent-change pos))
-                        (get-text-property pos 'indent))))
-
-      (goto-char (if prop pos (point-min))))))
+    (let* ((count 1)
+           prop)
+      (goto-char
+       (save-excursion
+         (while (and (not (= (point) (point-min)))
+                     (< 0 count))
+           (goto-char (enh-ruby-previous-indent-change (point)))
+           (setq prop (get-text-property (point) 'indent))
+           (setq count (cond
+                        ((or (eq prop 'l) (eq prop 'b) (eq prop 'd)) (1- count))
+                        ((or (eq prop 'r) (eq prop 'e)) (1+ count))
+                        (t count))))
+         (point))))))
 
 (defun enh-ruby-beginning-of-defun (&optional arg)
   "Move backward across one balanced expression (sexp) looking for a definition begining.
@@ -842,6 +854,8 @@ With ARG, do it that many times."
   (enh-ruby-forward-sexp 1)
   (forward-line 1)
   (push-mark (point) nil t)
+  (forward-line -1)
+  (end-of-line)
   (enh-ruby-backward-sexp 1)
   (forward-line 0))
 
@@ -939,28 +953,29 @@ With ARG, do it that many times."
 With ARG, do it that many times."
   (interactive "^p")
   (unless arg (setq arg 1))
-  (while (>= (setq arg (1- arg)) 0)
-    (let* ((pos (point))
-           (prop (get-text-property pos 'indent))
-           (count 0))
+  (if (< arg 0)
+      (enh-ruby-backward-sexp (- arg))
+    (while (>= (setq arg (1- arg)) 0)
+      (let* ((pos (point))
+             (prop (get-text-property pos 'indent))
+             (count 0))
 
-      (unless (or (eq prop 'l) (eq prop 'b) (eq prop 'd))
-        (setq prop (and (setq pos (enh-ruby-next-indent-change pos))
-                        (get-text-property pos 'indent))))
+        (unless (or (eq prop 'l) (eq prop 'b) (eq prop 'd))
+          (setq prop (and (setq pos (enh-ruby-next-indent-change pos))
+                          (get-text-property pos 'indent))))
 
-      (while (< 0 (setq count
-                        (cond
-                         ((or (eq prop 'l) (eq prop 'b) (eq prop 'd)) (1+ count))
-                         ((or (eq prop 'r) (eq prop 'e)) (1- count))
-                         ((eq prop 'c) count)
-                         ((eq prop 's) (if (= 0 count) 1 count))
-                         (t 0))))
-        (goto-char pos)
-        (setq prop (and (setq pos (enh-ruby-next-indent-change pos))
-                        (get-text-property pos 'indent))))
+        (while (< 0 (setq count
+                          (cond
+                           ((or (eq prop 'l) (eq prop 'b) (eq prop 'd)) (1+ count))
+                           ((or (eq prop 'r) (eq prop 'e)) (1- count))
+                           ((eq prop 'c) count)
+                           ((eq prop 's) (if (= 0 count) 1 count))
+                           (t 0))))
+          (goto-char pos)
+          (setq prop (and (setq pos (enh-ruby-next-indent-change pos))
+                          (get-text-property pos 'indent))))
 
-      (goto-char (if prop pos (point-max)))
-      (skip-syntax-forward ")w"))))     ; move past trailing ), }, or end
+        (goto-char (if prop pos (point-max)))))))
 
 (defun enh-ruby-insert-end ()
   (interactive)

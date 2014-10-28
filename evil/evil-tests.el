@@ -239,8 +239,9 @@ then the test fails unless an error of type SYMBOL is raised.
                           '(("(\\(evil-test-buffer\\)\\>"
                              1 font-lock-keyword-face))))
 
-(defun evil-test-buffer-string
-  (string &optional point-start point-end visual-start visual-end)
+(defun evil-test-buffer-string (string &optional
+                                       point-start point-end
+                                       visual-start visual-end)
   "Validate the current buffer according to STRING.
 If STRING contains an occurrence of POINT-START immediately
 followed by POINT-END, that position is compared against point.
@@ -274,9 +275,10 @@ VISUAL-START and VISUAL-END default to < and >."
               (evil-test-selection selection))))
       (kill-buffer marker-buffer))))
 
-(defun evil-test-buffer-from-string
-  (string &optional state point-start point-end
-          visual visual-start visual-end)
+(defun evil-test-buffer-from-string (string &optional
+                                            state
+                                            point-start point-end
+                                            visual visual-start visual-end)
   "Create a new buffer according to STRING.
 If STRING contains an occurrence of POINT-START immediately
 followed by POINT-END, then point is moved to that position.
@@ -313,8 +315,9 @@ VISUAL is the Visual selection: it defaults to `char'."
         (when (markerp evil-test-point)
           (goto-char evil-test-point))))))
 
-(defun evil-test-marker-buffer-from-string
-  (string &optional point-start point-end visual-start visual-end)
+(defun evil-test-marker-buffer-from-string (string &optional
+                                                   point-start point-end
+                                                   visual-start visual-end)
   "Create a new marker buffer according to STRING.
 If STRING contains an occurrence of POINT-START immediately
 followed by POINT-END, that position is stored in the
@@ -375,8 +378,7 @@ VISUAL-START and VISUAL-END default to < and >."
               (setq evil-test-visual-end
                     (move-marker (make-marker) (point))))))))))
 
-(defun evil-test-text
-  (before after &optional before-predicate after-predicate)
+(defun evil-test-text (before after &optional before-predicate after-predicate)
   "Verify the text around point.
 BEFORE is the expected text before point, and AFTER is
 the text after point. BEFORE-PREDICATE is a predicate function
@@ -409,8 +411,8 @@ is executed at the end."
         (forward-char (length after))
         (should (funcall after-predicate))))))
 
-(defmacro evil-test-selection
-  (string &optional end-string before-predicate after-predicate)
+(defmacro evil-test-selection (string &optional end-string
+                                      before-predicate after-predicate)
   "Verify that the Visual selection contains STRING."
   (declare (indent defun))
   `(progn
@@ -421,8 +423,8 @@ is executed at the end."
        (goto-char (or evil-visual-end (region-end)))
        (evil-test-text (or ,end-string ,string) nil nil ,after-predicate))))
 
-(defmacro evil-test-region
-  (string &optional end-string before-predicate after-predicate)
+(defmacro evil-test-region (string &optional end-string
+                                   before-predicate after-predicate)
   "Verify that the region contains STRING."
   (declare (indent defun))
   `(progn
@@ -433,8 +435,8 @@ is executed at the end."
        (goto-char (region-end))
        (evil-test-text (or ,end-string ,string) nil nil ,after-predicate))))
 
-(defmacro evil-test-overlay
-  (overlay string &optional end-string before-predicate after-predicate)
+(defmacro evil-test-overlay (overlay string &optional end-string
+                                     before-predicate after-predicate)
   "Verify that OVERLAY contains STRING."
   (declare (indent defun))
   `(progn
@@ -1210,7 +1212,7 @@ This buffer is for notes")))
   "Test whether repeat returns to normal state in case of an error."
   (evil-test-buffer
     "[l]ine 1\nline 2\nline 3\nline 4"
-    ("ixxx" [down] [down] [home] "yyy" [escape])
+    ("ixxx" [down] [down] [left] [left] [left] "yyy" [escape])
     "xxxline 1\nline 2\nyy[y]line 3\nline 4"
     (should-error (execute-kbd-macro "j^."))
     (should (evil-normal-state-p))
@@ -6171,7 +6173,13 @@ Below some empty line."))
       "This is \"a test[\"]. For \"quote\" objects."
       (emacs-lisp-mode)
       ("va\"")
-      "This is< \"a test[\"]>. For \"quote\" objects.")))
+      "This is< \"a test[\"]>. For \"quote\" objects."))
+  (ert-info ("Delete text from outside")
+    (evil-test-buffer
+      "Th[i]s is \"a test\". For \"quote\" objects."
+      (emacs-lisp-mode)
+      ("da\"")
+      "This is[.] For \"quote\" objects.")))
 
 (ert-deftest evil-test-paren-objects ()
   "Test `evil-inner-paren', etc."
@@ -7347,6 +7355,108 @@ maybe we need one line more with some text\n")
       "line1\nline2\nline3\nli[n]e4\nline5\n"
       (":2,4move.")
       "line1\nline2\nline3\n[l]ine4\nline5\n")))
+
+;;; Command line window
+
+(ert-deftest evil-test-command-window-ex ()
+  "Test command line window for ex commands"
+  (evil-test-buffer
+    "[f]oo foo foo"
+    (":s/foo/bar" [return])
+    "[b]ar foo foo"
+    (":s/foo/baz" [return])
+    "[b]ar baz foo"
+    ("q:")
+    "s/foo/bar\ns/foo/baz\n[ ]"
+    ("kk:s/bar/quz" [return])
+    "[s]/foo/quz\ns/foo/baz\n "
+    ("fzrx")
+    "s/foo/qu[x]\ns/foo/baz\n "
+    ([return])
+    "[b]ar baz qux"
+    (should (equal (car evil-ex-history)
+                   "s/foo/qux"))))
+
+(ert-deftest evil-test-command-window-recursive ()
+  "Test that recursive command windows shouldn't be allowed"
+  (let ((evil-command-window-height 0))
+    (evil-test-buffer
+      "[f]oo foo foo"
+      (":s/foo/bar" [return])
+      ("q:")
+      (should-error (execute-kbd-macro "q:")))))
+
+(ert-deftest evil-test-command-window-noop ()
+  "Test that executing a blank command does nothing"
+  (evil-test-buffer
+    "[f]oo foo foo"
+    ("q:")
+    "[ ]"
+    ([return])
+    "[f]oo foo foo"))
+
+(ert-deftest evil-test-command-window-multiple ()
+  "Test that multiple command line windows can't be visible at the same time"
+  (let ((evil-command-window-height 0))
+    (evil-test-buffer
+      "[f]oo foo foo"
+      ("q:")
+      (let ((num-windows (length (window-list))))
+        (select-window (previous-window))
+        (execute-kbd-macro "q:")
+        (should (= (length (window-list)) num-windows))))))
+
+(defmacro evil-with-both-search-modules (&rest body)
+  `(mapc (lambda (search-module)
+           (setq evil-search-forward-history nil
+                 evil-search-backward-history nil)
+           (evil-select-search-module 'evil-search-module search-module)
+           ,@body)
+         '(isearch evil-search)))
+
+(ert-deftest evil-test-command-window-search-history ()
+  "Test command window with forward and backward search history"
+  (evil-with-both-search-modules
+   (evil-test-buffer
+     "[f]oo bar baz qux one two three four"
+     ("/qux" [return])
+     "foo bar baz [q]ux one two three four"
+     ("/three" [return])
+     "foo bar baz qux one two [t]hree four"
+     ("?bar" [return])
+     "foo [b]ar baz qux one two three four"
+     ("/four" [return])
+     "foo bar baz qux one two three [f]our"
+     ("?baz" [return])
+     "foo bar [b]az qux one two three four"
+     ("q/")
+     "qux\nthree\nfour\n[ ]"
+     ("k" [return])
+     "foo bar baz qux one two three [f]our"
+     ("0N")
+     "foo bar baz qux one two three [f]our"
+     ("q?")
+     "bar\nbaz\n[ ]"
+     ("k$rr" [return])
+     "foo [b]ar baz qux one two three four"
+     (should-error
+      (progn (execute-kbd-macro "q/iNOT THERE")
+             (execute-kbd-macro [return])))
+     "foo [b]ar baz qux one two three four")))
+
+(ert-deftest evil-test-command-window-search-word ()
+  "Test command window history when searching for word under cursor"
+  (evil-with-both-search-modules
+   (evil-test-buffer
+     "[f]oo bar foo bar foo"
+     ("**")
+     "foo bar foo bar [f]oo"
+     ("B#")
+     "foo [b]ar foo bar foo"
+     ("q/k" [return])
+     "foo bar [f]oo bar foo"
+     ("q?k" [return])
+     "foo [b]ar foo bar foo")))
 
 ;;; Utilities
 

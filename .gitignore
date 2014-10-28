@@ -1,3 +1,4 @@
 # Compiled
 *.elc
 *.local~
+ido.last

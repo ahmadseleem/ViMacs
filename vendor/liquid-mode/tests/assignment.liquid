@@ -1,0 +1,26 @@
+{% assign name = 'freestyle' %}
+
+{% for t in collections.tags %}{% if t == name %}
+  <p>Freestyle!</p>
+{% endif %}{% endfor %}
+
+{% assign freestyle = false %}
+
+{% for t in collections.tags %}{% if t == 'freestyle' %}
+  {% assign freestyle = true %}
+{% endif %}{% endfor %}
+
+{% if freestyle %}
+  <p>Freestyle!</p>
+{% endif %}
+
+{% capture attribute_name %}{{ item.title | handleize }}-{{ i }}-color{% endcapture %}
+
+  <label for="{{ attribute_name }}">Color:</label>
+  <select name="attributes[{{ attribute_name }}]" id="{{ attribute_name }}">
+    <option value="red">Red</option>
+    <option value="green">Green</option>
+    <option value="blue">Blue</option>
+  </select>
+
+{{ foo | barize | bazize }}

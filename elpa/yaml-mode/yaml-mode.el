@@ -1,12 +1,12 @@
 ;;; yaml-mode.el --- Major mode for editing YAML files
 
-;; Copyright (C) 2010-2013 Yoshiki Kurihara
+;; Copyright (C) 2010-2014 Yoshiki Kurihara
 
 ;; Author: Yoshiki Kurihara <clouder@gmail.com>
 ;;         Marshall T. Vandegrift <llasram@gmail.com>
 ;; Keywords: data yaml
-;; Version: 20130310.2101
-;; X-Original-Version: 0.0.9
+;; Version: 20140824.2132
+;; X-Original-Version: 0.0.10
 
 ;; This file is not part of Emacs
 
@@ -116,7 +116,7 @@ that key is pressed to begin a block literal."
 
 ;; Constants
 
-(defconst yaml-mode-version "0.0.9" "Version of `yaml-mode'.")
+(defconst yaml-mode-version "0.0.10" "Version of `yaml-mode'.")
 
 (defconst yaml-blank-line-re "^ *$"
   "Regexp matching a line containing only (valid) whitespace.")
@@ -195,8 +195,7 @@ that key is pressed to begin a block literal."
   (define-key yaml-mode-map ">" 'yaml-electric-bar-and-angle)
   (define-key yaml-mode-map "-" 'yaml-electric-dash-and-dot)
   (define-key yaml-mode-map "." 'yaml-electric-dash-and-dot)
-  (define-key yaml-mode-map [backspace] 'yaml-electric-backspace)
-  (define-key yaml-mode-map "\C-j" 'newline-and-indent))
+  (define-key yaml-mode-map [backspace] 'yaml-electric-backspace))
 
 (defvar yaml-mode-syntax-table nil
   "Syntax table in use in `yaml-mode' buffers.")

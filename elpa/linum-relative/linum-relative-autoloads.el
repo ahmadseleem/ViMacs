@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads nil nil ("linum-relative.el") (21333 57223 258256
+;;;### (autoloads nil nil ("linum-relative.el") (21583 19959 666197
 ;;;;;;  0))
 
 ;;;***

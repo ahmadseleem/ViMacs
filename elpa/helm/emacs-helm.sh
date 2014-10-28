@@ -23,7 +23,6 @@
 # Run it from this directory.
 
 TMP="/tmp/helm-cfg.el"
-LOADPATH=$(readlink -f $0 | xargs dirname)
 EMACS=emacs
 
 case $1 in
@@ -37,6 +36,23 @@ case $1 in
         exit 2
         ;;
 esac
+
+cd $(dirname "$0")
+
+# Check if autoload file exists.
+# It is maybe in a different directory if
+# emacs-helm.sh is a symlink.
+LS=$(ls -l $0 | awk '{print $11}')
+if [ ! -z $LS ]; then
+    AUTO_FILE="$(dirname $LS)/helm-autoloads.el"
+else
+    AUTO_FILE="helm-autoloads.el"
+fi
+if [ ! -e "$AUTO_FILE" ]; then
+    echo No autoloads found, please run make first to generate autoload file
+    exit 2
+fi
+
 
 cat > $TMP <<EOF
 (setq initial-scratch-message (concat initial-scratch-message
@@ -62,7 +78,7 @@ cat > $TMP <<EOF
                             (menu-bar-lines . 0)
                             (fullscreen . nil)))
 (blink-cursor-mode -1)
-(add-to-list 'load-path (expand-file-name "$LOADPATH"))
+(add-to-list 'load-path (file-name-directory (file-truename "$0")))
 (require 'helm-config)
 (helm-mode 1)
 (define-key global-map [remap find-file] 'helm-find-files)
@@ -72,7 +88,8 @@ cat > $TMP <<EOF
 (unless (boundp 'completion-in-region-function)
   (define-key lisp-interaction-mode-map [remap completion-at-point] 'helm-lisp-completion-at-point)
   (define-key emacs-lisp-mode-map       [remap completion-at-point] 'helm-lisp-completion-at-point))
-(add-hook 'kill-emacs-hook #'(lambda () (delete-file "$TMP")))
+(add-hook 'kill-emacs-hook #'(lambda () (and (file-exists-p "$TMP") (delete-file "$TMP"))))
 EOF
 
 $EMACS -Q -l $TMP $@
+

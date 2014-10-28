@@ -1,0 +1,7 @@
+# Lines that start with '#' are comments.
+
+# Emacs backup files
+*~
+# Emacs file locks
+.#*
+\#*#

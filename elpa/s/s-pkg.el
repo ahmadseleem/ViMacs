@@ -1,1 +1,1 @@
-(define-package "s" "20131223.944" "The long lost Emacs string manipulation library." 'nil :keywords ("strings"))
+(define-package "s" "20140910.334" "The long lost Emacs string manipulation library." 'nil :keywords '("strings"))

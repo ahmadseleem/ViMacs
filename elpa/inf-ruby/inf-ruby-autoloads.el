@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads nil "inf-ruby" "inf-ruby.el" (21331 23052 0 0))
+;;;### (autoloads nil "inf-ruby" "inf-ruby.el" (21583 19960 0 0))
 ;;; Generated autoloads from inf-ruby.el
 
 (defvar ruby-source-modes '(ruby-mode enh-ruby-mode) "\
@@ -75,6 +75,11 @@ Gemfile, it should use the `gemspec' instruction.
 Run racksh, custom console.rb, or just IRB, in DIR.
 
 \(fn DIR)" t nil)
+
+(autoload 'inf-ruby-file-contents-match "inf-ruby" "\
+
+
+\(fn FILE REGEXP &optional MATCH-GROUP)" nil nil)
  (dolist (mode ruby-source-modes) (add-hook (intern (format "%s-hook" mode)) 'inf-ruby-minor-mode))
 
 ;;;***

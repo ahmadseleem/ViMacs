@@ -25,18 +25,6 @@
 (require 'neotree)
 (require 'neotree-test)
 
-(defmacro neo-tests--with-temp-dir (&rest body)
-  (declare (indent 0) (debug t))
-  (let ((dir (gensym)))
-    `(let ((,dir (file-name-as-directory (make-temp-file "dir" t))))
-       (unwind-protect
-           (let ((default-directory ,dir)) ,@body)
-         (delete-directory ,dir t)))))
-
-(defadvice window-at (around neo-test-neotree-startup activate)
-  ad-do-it
-  (setq ad-return-value (selected-window))
-  ad-return-value)
 
 (ert-deftest neo-test-neotree-startup ()
   (neotree)

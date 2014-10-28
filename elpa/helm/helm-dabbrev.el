@@ -87,7 +87,7 @@ but the initial search for all candidates in buffer(s)."
 (defvar helm-dabbrev--exclude-current-buffer-flag nil)
 (defvar helm-dabbrev--cache nil)
 (defvar helm-dabbrev--data nil)
-(defvar helm-dabbrev--regexp "\\s-\\|\t\\|[(\[\{\"'`=<$]\\|\\s\\\\|^")
+(defvar helm-dabbrev--regexp "\\s-\\|\t\\|[(\[\{\"'`=<$;]\\|\\s\\\\|^")
 (cl-defstruct helm-dabbrev-info dabbrev limits iterator)
 
 
@@ -157,9 +157,19 @@ but the initial search for all candidates in buffer(s)."
                               (setq pos-before pos)
                               (search-backward pattern pos t))))
                 (let* ((match-1 (helm-aif (thing-at-point 'symbol)
-                                    (substring-no-properties it)))
+                                    ;; `thing-at-point' returns
+                                    ;; the quote outside of e-lisp mode,
+                                    ;; e.g in message mode,
+                                    ;; `foo' => foo'
+                                    ;; but in e-lisp like modes:
+                                    ;; `foo' => foo
+                                    ;; so remove it [1].
+                                    (replace-regexp-in-string
+                                     "[']\\'" "" (substring-no-properties it))))
                        (match-2 (helm-aif (thing-at-point 'filename)
-                                    (substring-no-properties it)))
+                                    ;; Same as in [1].
+                                    (replace-regexp-in-string
+                                     "[']\\'" "" (substring-no-properties it))))
                        (lst (if (string= match-1 match-2)
                                 (list match-1)
                               (list match-1 match-2))))
@@ -216,6 +226,8 @@ but the initial search for all candidates in buffer(s)."
               (helm-init-candidates-in-buffer 'global
                 helm-dabbrev--cache)))
     (candidates-in-buffer)
+    (persistent-action . (lambda (_candidate) (ignore)))
+    (persistent-help . "DoNothing")
     (keymap . ,helm-dabbrev-map)
     (action . helm-dabbrev-default-action)))
 

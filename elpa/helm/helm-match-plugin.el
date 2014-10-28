@@ -65,7 +65,7 @@
                    helm-mp-default-search-backward-functions
                    '(helm-mp-exact-search-backward
                      helm-mp-3p-search-backward)))
-    (t (error "Unknow value: %s" helm-mp-matching-method))))
+    (t (error "Unknown value: %s" helm-mp-matching-method))))
 
 (defgroup helm-match-plugin nil
   "Helm match plugin."
@@ -89,7 +89,8 @@ Default is multi3."
   :group 'helm-match-plugin)
 
 (defface helm-match
-    '((t (:inherit match)))
+  '((((background light)) :foreground "#b00000")
+    (((background dark))  :foreground "gold1"))
   "Face used to highlight matches."
   :group 'helm-match-plugin)
 
@@ -372,10 +373,8 @@ e.g \"bar foo\" will match \"barfoo\" but not \"foobar\" contrarily to
                                    (defsearch
                                     (append searchers defsearch))
                                    (t searchers))))
-      `(,(if (or (assoc 'candidates-in-buffer source)
-                 (equal '(identity) matchfns))
-             '(match identity) `(match ,@matchfns))
-         (search ,@searchfns)
+      `(,(if (assoc 'candidates-in-buffer source)
+             `(search ,@searchfns) `(match ,@matchfns))
          ,@source))))
 
 

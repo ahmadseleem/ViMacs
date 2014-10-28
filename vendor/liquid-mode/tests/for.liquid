@@ -1,0 +1,23 @@
+{% for item in array %} 
+   {{ forloop.length  }}
+   {{ forloop.index   }}
+   {{ forloop.index0  }} 
+   {{ forloop.rindex  }}
+   {{ forloop.rindex0 }}	
+   {{ forloop.first   }}
+   {{ forloop.last    }}
+{% endfor %} 
+
+# array = [1,2,3,4,5,6]
+{% for item in array limit:2 offset:2 %} 
+  {{ item }}
+{% endfor %} 
+# results in 3,4 
+
+{% for item in collection reversed %} {{item}} {% endfor %}
+
+# if item.quantity is 4...
+{% for i in (1..item.quantity) %}
+  {{ i }}
+{% endfor %}
+# results in 1,2,3,4

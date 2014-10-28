@@ -127,6 +127,9 @@
 
 (setq scroll-step 1)
 
+(show-paren-mode 1) ; turn on paren match highlighting
+;(setq show-paren-style 'expression) ; highlight entire bracket expression
+  
 (set-frame-width (selected-frame) 110)
 
 ;; Project find .......................................
