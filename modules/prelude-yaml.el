@@ -1,17 +1,17 @@
-;;; prelude-css.el --- Emacs Prelude: css support
+;;; prelude-yaml.el --- Emacs Prelude: YAML programming support.
 ;;
-;; Copyright © 2011-2013 Bozhidar Batsov
+;; Copyright © 2011-2014 Bozhidar Batsov
 ;;
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
-;; URL: http://www.batsov.com/emacs-prelude
+;; Author: ToBeReplaced
+;; URL: http://batsov.com/prelude
 ;; Version: 1.0.0
-;; Keywords: convenience
+;; Keywords: convenience yaml
 
 ;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
 
-;; Some basic configuration for css-mode.
+;; Prelude configuration for YAML.
 
 ;;; License:
 
@@ -31,21 +31,14 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
+(prelude-require-packages '(yaml-mode))
 
-(eval-after-load 'css-mode
-  '(progn
-     (prelude-require-packages '(rainbow-mode))
+;; yaml-mode doesn't derive from prog-mode, but we can at least enable
+;; whitespace-mode and apply cleanup.
+(add-hook 'yaml-mode-hook 'whitespace-mode)
+(add-hook 'yaml-mode-hook 'subword-mode)
+(add-hook 'yaml-mode-hook
+          (lambda () (add-hook 'before-save-hook 'prelude-cleanup-maybe nil t)))
 
-     (setq css-indent-offset 2)
-     
-     (defun prelude-css-mode-defaults ()
-       (rainbow-mode +1)
-       (run-hooks 'prelude-prog-mode-hook))
-
-     (setq prelude-css-mode-hook 'prelude-css-mode-defaults)
-
-     (add-hook 'css-mode-hook (lambda ()
-                                (run-hooks 'prelude-css-mode-hook)))))
-
-(provide 'prelude-css)
-;;; prelude-css.el ends here
+(provide 'prelude-yaml)
+;;; prelude-yaml.el ends here

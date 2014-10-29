@@ -1,4 +1,4 @@
-;;; prelude-c.el --- Emacs Prelude: cc-mode configuration.
+;;; prelude-haskell.el --- Emacs Prelude: Nice config for Haskell programming.
 ;;
 ;; Copyright © 2011-2013 Bozhidar Batsov
 ;;
@@ -11,7 +11,7 @@
 
 ;;; Commentary:
 
-;; Some basic configuration for cc-mode and the modes derived from it.
+;; Nice config for Haskell programming.
 
 ;;; License:
 
@@ -33,26 +33,21 @@
 ;;; Code:
 
 (require 'prelude-programming)
+(prelude-require-packages '(haskell-mode))
 
-(defun prelude-c-mode-common-defaults ()
-  (setq c-basic-offset 4)
-  (c-set-offset 'substatement-open 0))
+(eval-after-load 'haskell-mode
+  '(progn
+     (defun prelude-haskell-mode-defaults ()
+       (subword-mode +1)
+       (turn-on-haskell-doc-mode)
+       (turn-on-haskell-indentation)
+       (interactive-haskell-mode +1))
 
-(setq prelude-c-mode-common-hook 'prelude-c-mode-common-defaults)
+     (setq prelude-haskell-mode-hook 'prelude-haskell-mode-defaults)
 
-;; this will affect all modes derived from cc-mode, like
-;; java-mode, php-mode, etc
-(add-hook 'c-mode-common-hook (lambda ()
-                                (run-hooks 'prelude-c-mode-common-hook)))
+     (add-hook 'haskell-mode-hook (lambda ()
+                                    (run-hooks 'prelude-haskell-mode-hook)))))
 
-(defun prelude-makefile-mode-defaults ()
-  (whitespace-toggle-options '(tabs))
-  (setq indent-tabs-mode t ))
+(provide 'prelude-haskell)
 
-(setq prelude-makefile-mode-hook 'prelude-makefile-mode-defaults)
-
-(add-hook 'makefile-mode-hook (lambda ()
-                                (run-hooks 'prelude-makefile-mode-hook)))
-(provide 'prelude-c)
-
-;;; prelude-c.el ends here
+;;; prelude-haskell.el ends here

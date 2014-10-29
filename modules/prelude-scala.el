@@ -1,4 +1,4 @@
-;;; prelude-c.el --- Emacs Prelude: cc-mode configuration.
+;;; prelude-scala.el --- Emacs Prelude: scala-mode configuration.
 ;;
 ;; Copyright © 2011-2013 Bozhidar Batsov
 ;;
@@ -11,7 +11,7 @@
 
 ;;; Commentary:
 
-;; Some basic configuration for cc-mode and the modes derived from it.
+;; Some basic support for the Scala programming language
 
 ;;; License:
 
@@ -33,26 +33,15 @@
 ;;; Code:
 
 (require 'prelude-programming)
+(prelude-require-packages '(scala-mode2))
 
-(defun prelude-c-mode-common-defaults ()
-  (setq c-basic-offset 4)
-  (c-set-offset 'substatement-open 0))
+(defun prelude-scala-mode-defaults ()
+  (subword-mode +1))
 
-(setq prelude-c-mode-common-hook 'prelude-c-mode-common-defaults)
+(setq prelude-scala-mode-hook 'prelude-scala-mode-defaults)
 
-;; this will affect all modes derived from cc-mode, like
-;; java-mode, php-mode, etc
-(add-hook 'c-mode-common-hook (lambda ()
-                                (run-hooks 'prelude-c-mode-common-hook)))
+(add-hook 'scala-mode-hook (lambda ()
+                             (run-hooks 'prelude-scala-mode-hook)))
+(provide 'prelude-scala)
 
-(defun prelude-makefile-mode-defaults ()
-  (whitespace-toggle-options '(tabs))
-  (setq indent-tabs-mode t ))
-
-(setq prelude-makefile-mode-hook 'prelude-makefile-mode-defaults)
-
-(add-hook 'makefile-mode-hook (lambda ()
-                                (run-hooks 'prelude-makefile-mode-hook)))
-(provide 'prelude-c)
-
-;;; prelude-c.el ends here
+;;; prelude-scala.el ends here

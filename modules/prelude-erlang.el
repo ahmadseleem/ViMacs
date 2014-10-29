@@ -1,17 +1,16 @@
-;;; prelude-scheme.el --- Emacs Prelude: Some defaults for Scheme.
+;;; prelude-erlang.el --- Emacs Prelude: Erlang programming support.
 ;;
-;; Copyright © 2011-2013 Bozhidar Batsov
+;; Copyright © 2011-2013 Gleb Peregud
 ;;
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
-;; URL: https://github.com/bbatsov/prelude
+;; Author: Gleb Peregud <gleber.p@gmail.com>
 ;; Version: 1.0.0
-;; Keywords: convenience
+;; Keywords: convenience erlang
 
 ;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
 
-;; Some basic configuration for Scheme programming.
+;; Erlang is a concurrent functional language.
 
 ;;; License:
 
@@ -31,20 +30,31 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(prelude-require-package 'geiser)
 
-(require 'prelude-lisp)
-(require 'geiser)
+(require 'prelude-programming)
+(prelude-require-packages '(erlang))
 
-;; geiser replies on a REPL to provide autodoc and completion
-(setq geiser-mode-start-repl-p t)
+(defcustom wrangler-path nil
+  "The location of wrangler elisp directory."
+  :group 'prelude-erlang
+  :type 'string
+  :safe 'stringp)
 
-;; keep the home clean
-(setq geiser-repl-history-filename
-      (expand-file-name "geiser-history" prelude-savefile-dir))
+(require 'projectile)
 
-(add-hook 'scheme-mode-hook (lambda () (run-hooks 'prelude-lisp-coding-hook)))
+(when (require 'erlang-start nil t)
 
-(provide 'prelude-scheme)
+  (eval-after-load 'erlang-mode
+    '(progn
+       (flymake-mode)))
 
-;;; prelude-scheme.el ends here
+  (when (not (null wrangler-path))
+    (add-to-list 'load-path wrangler-path)
+    (require 'wrangler)))
+
+(add-hook 'erlang-mode-hook (lambda ()
+                              (setq erlang-compile-function 'projectile-compile-project)))
+
+(provide 'prelude-erlang)
+
+;;; prelude-erlang.el ends here
