@@ -125,7 +125,11 @@
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
 
-(setq scroll-step 1)
+;; Scrolling ... TODO ...
+; Autosave every 500 typed characters
+(setq auto-save-interval 500)
+; Scroll just one line when hitting bottom of window
+(setq scroll-conservatively 10000)
 
 (show-paren-mode 1) ; turn on paren match highlighting
 ;(setq show-paren-style 'expression) ; highlight entire bracket expression
