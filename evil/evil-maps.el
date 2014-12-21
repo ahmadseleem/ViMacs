@@ -213,8 +213,8 @@
 (define-key evil-motion-state-map "%" 'evil-jump-item)
 (define-key evil-motion-state-map "`" 'evil-goto-mark)
 (define-key evil-motion-state-map "'" 'evil-goto-mark-line)
-(define-key evil-motion-state-map "(" 'evil-backward-sentence)
-(define-key evil-motion-state-map ")" 'evil-forward-sentence)
+(define-key evil-motion-state-map "(" 'evil-backward-sentence-begin)
+(define-key evil-motion-state-map ")" 'evil-forward-sentence-begin)
 (define-key evil-motion-state-map "]]" 'evil-forward-section-begin)
 (define-key evil-motion-state-map "][" 'evil-forward-section-end)
 (define-key evil-motion-state-map "[[" 'evil-backward-section-begin)
@@ -358,8 +358,6 @@
 (define-key evil-insert-state-map "\C-d" 'evil-shift-left-line)
 (define-key evil-insert-state-map [remap delete-backward-char] 'evil-delete-backward-char-and-join)
 (define-key evil-insert-state-map [delete] 'delete-char)
-(define-key evil-insert-state-map [remap newline] 'evil-ret)
-(define-key evil-insert-state-map [remap newline-and-indent] 'evil-ret-and-indent)
 (define-key evil-insert-state-map [escape] 'evil-normal-state)
 (define-key evil-insert-state-map
   (read-kbd-macro evil-toggle-key) 'evil-emacs-state)
@@ -380,13 +378,6 @@
 
 (when evil-want-C-w-in-emacs-state
   (define-key evil-emacs-state-map "\C-w" 'evil-window-map))
-
-;;; Minibuffer
-
-(define-key minibuffer-local-map "\C-p" 'evil-complete-next)
-(define-key minibuffer-local-map "\C-n" 'evil-complete-previous)
-(define-key minibuffer-local-map "\C-x\C-p" 'evil-complete-next-line)
-(define-key minibuffer-local-map "\C-x\C-n" 'evil-complete-previous-line)
 
 ;;; Mouse
 (define-key evil-motion-state-map [down-mouse-1] 'evil-mouse-drag-region)
@@ -473,6 +464,7 @@
 (define-key evil-ex-completion-map "\d" #'evil-ex-delete-backward-char)
 (define-key evil-ex-completion-map "\t" #'evil-ex-completion)
 (define-key evil-ex-completion-map [tab] #'evil-ex-completion)
+(define-key evil-ex-completion-map [remap completion-at-point] #'evil-ex-completion)
 (define-key evil-ex-completion-map "\C-a" 'evil-ex-completion)
 (define-key evil-ex-completion-map "\C-b" 'move-beginning-of-line)
 (define-key evil-ex-completion-map "\C-c" 'abort-recursive-edit)

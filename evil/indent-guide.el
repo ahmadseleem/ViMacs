@@ -1,6 +1,6 @@
 ;;; indent-guide.el --- show vertical lines to guide indentation
 
-;; Copyright (C) 2013 zk_phi
+;; Copyright (C) 2013-2014 zk_phi
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 
 ;; Author: zk_phi
 ;; URL: http://hins11.yu-yake.com/
-;; Version: 20140212.2009
-;; X-Original-Version: 2.1.5
+;; Version: 2.1.6
 
 ;;; Commentary:
 
@@ -67,89 +66,81 @@
 ;; 2.1.4 use "display" property instead of "before-string"
 ;;       (now works better with hl-line and linum)
 ;; 2.1.5 add "indent-guide-inhibit-modes"
+;; 2.1.6 add option "indent-guide-recursive"
 
 ;;; Code:
 
-(defconst indent-guide-version "2.1.5")
+(defconst indent-guide-version "2.1.6")
 
 ;; * customs
 
 (defgroup indent-guide nil
-  "show vertical lines to guide indentation"
+  "Show vertical lines to guide indentation."
   :group 'emacs)
 
 (defcustom indent-guide-char "|"
-  "character used as vertical line"
+  "Character used as vertical line."
+  :type 'string
   :group 'indent-guide)
 
 (defcustom indent-guide-inhibit-modes '(dired-mode)
-  "list of major-modes in which indent-guide should be turned off"
+  "List of major-modes in which indent-guide should be turned off."
+  :type '(repeat symbol)
   :group 'indent-guide)
 
-;; * minor-mode
+(defcustom indent-guide-recursive nil
+  "When non-nil, draw multiple guide lines recursively."
+  :type 'boolean
+  :group 'indent-guide)
 
-(define-minor-mode indent-guide-mode
-  "show vertical lines to guide indentation"
-  :init-value nil
-  :lighter " ing"
-  :global nil
-  (if indent-guide-mode
-      (progn
-        (add-hook 'pre-command-hook 'indent-guide-remove nil t)
-        (add-hook 'post-command-hook 'indent-guide-show nil t))
-    (remove-hook 'pre-command-hook 'indent-guide-remove t)
-    (remove-hook 'post-command-hook 'indent-guide-show t)))
+(defcustom indent-guide-delay nil
+  "When a positive number, rendering guide lines is delayed DELAY
+  seconds."
+  :type 'number
+  :group 'indent-guide)
 
-(define-globalized-minor-mode indent-guide-global-mode
-  indent-guide-mode
-  (lambda ()
-    (unless (memq major-mode indent-guide-inhibit-modes)
-      (indent-guide-mode 1))))
+(defface indent-guide-face '((t (:foreground "#535353")))
+  "Face used to indent guide lines."
+  :group 'indent-guide)
 
-;; * variables / faces
+;; * variables
 
-(make-face 'indent-guide-face)
-(set-face-attribute 'indent-guide-face nil
-                    :foreground "#D4E8F4")
+(defvar indent-guide--timer-object nil)
 
 ;; * utilities
 
 (defun indent-guide--active-overlays ()
+  "Return the list of all overlays created by indent-guide."
   (delq nil
         (mapcar
          (lambda (ov)
            (and (eq (overlay-get ov 'category) 'indent-guide) ov))
          (overlays-in (point-min) (point-max)))))
 
-(defun indent-guide--beginning-of-level (&optional origin)
-  ;; origin <- indent column of current line
-  (unless origin
-    (back-to-indentation)
-    (if (not (eolp))
-        (setq origin (current-column))
-      (let ((forward (save-excursion
-                       (while (and (forward-line 1)
-                                   (not (eobp))
-                                   (progn (back-to-indentation) t)
-                                   (eolp)))
-                       (if (eobp) 0 (current-column))))
-            (backward (save-excursion
-                        (while (and (zerop (forward-line -1))
-                                    (progn (back-to-indentation) t)
-                                    (eolp)))
-                        (if (bobp) 0 (current-column)))))
-        (setq origin (max forward backward)))))
-  (cond ((zerop origin)
-         (point))
-        ((= (forward-line -1) -1)
-         nil)
-        ((progn
-           (back-to-indentation)
-           (and (not (eolp))
-                (< (current-column) origin)))
-         (point))
-        (t
-         (indent-guide--beginning-of-level origin))))
+(defun indent-guide--beginning-of-level ()
+  "Move to the beginning of current indentation level and returns
+the point."
+  (let ((base-level (if (progn (back-to-indentation)
+                               (not (eolp)))
+                        (current-column)
+                      (max (save-excursion
+                             (skip-chars-forward "\s\t\n")
+                             (back-to-indentation)
+                             (current-column))
+                           (save-excursion
+                             (skip-chars-backward "\s\t\n")
+                             (back-to-indentation)
+                             (current-column))))))
+    (if (zerop base-level)
+        (point)
+      (catch 'fail
+        (while (progn
+                 (when (= (forward-line -1) -1)
+                   (throw 'fail nil))
+                 (back-to-indentation)
+                 (or (eolp)
+                     (>= (current-column) base-level))))
+        (point)))))
 
 ;; * generate guides
 
@@ -163,51 +154,80 @@
       (forward-line (1- line))
       (move-to-column col)
       ;; calculate difference from the actual col
-      (setq diff (- (current-column) col))
+      (setq diff (- col (current-column)))
       ;; make overlay or not
-      (cond ((eolp)                     ; blank line (with no or less indent)
-             (setq string (concat (make-string (- diff) ?\s)
-                                  indent-guide-char)
-                   prop   'before-string
-                   ov     (and (not (= (point) original-pos))
-                               (make-overlay (point) (point)))))
-            ((not (zerop diff))         ; looking back tab
-             (setq string (concat (make-string (- tab-width diff) ?\s)
-                                  indent-guide-char
-                                  (make-string (1- diff) ?\s))
-                   prop   'display
-                   ov     (and (not (= (point) (1- original-pos)))
-                               (make-overlay (point) (1- (point))))))
-            ((looking-at "\t")          ; looking at tab
+      (cond ((and (eolp) (<= 0 diff))   ; the line is too short
+             ;; <-line-width->  <-diff->
+             ;;               []        |
+             (if (setq ov (cl-some
+                           (lambda (ov)
+                             (when (eq (overlay-get ov 'category) 'indent-guide)
+                               ov))
+                           (overlays-in (point) (point))))
+                 ;; we already have an overlay here => append to the existing overlay
+                 ;; (important when "recursive" is enabled)
+                 (setq string (let ((str (overlay-get ov 'before-string)))
+                                (concat str
+                                        (make-string (- diff (length str)) ?\s)
+                                        indent-guide-char))
+                       prop   'before-string)
+               (setq string (concat (make-string diff ?\s) indent-guide-char)
+                     prop   'before-string
+                     ov     (make-overlay (point) (point)))))
+            ((< diff 0)                 ; the column is inside a tab
+             ;;  <---tab-width-->
+             ;;      <-(- diff)->
+             ;;     |            []
+             (if (setq ov (cl-some
+                           (lambda (ov)
+                             (when (eq (overlay-get ov 'category) 'indent-guide)
+                               ov))
+                           (overlays-in (1- (point)) (point))))
+                 ;; we already have an overlay here => modify the existing overlay
+                 ;; (important when "recursive" is enabled)
+                 (setq string (let ((str (overlay-get ov 'display)))
+                                (aset str (+ 1 tab-width diff) ?|)
+                                str)
+                       prop   'display)
+               (setq string (concat (make-string (+ tab-width diff) ?\s)
+                                    indent-guide-char
+                                    (make-string (1- (- diff)) ?\s))
+                     prop   'display
+                     ov     (make-overlay (point) (1- (point))))))
+            ((looking-at "\t")          ; okay but looking at tab
+             ;;    <-tab-width->
+             ;; [|]
              (setq string (concat indent-guide-char
                                   (make-string (1- tab-width) ?\s))
                    prop   'display
-                   ov     (and (not (= (point) original-pos))
-                               (make-overlay (point) (1+ (point))))))
+                   ov     (make-overlay (point) (1+ (point)))))
             (t                          ; no problem
              (setq string indent-guide-char
                    prop   'display
-                   ov     (and (not (= (point) original-pos))
-                               (make-overlay (point) (1+ (point)))))))
+                   ov     (make-overlay (point) (1+ (point))))))
       (when ov
         (overlay-put ov 'category 'indent-guide)
         (overlay-put ov prop
                      (propertize string 'face 'indent-guide-face))))))
 
 (defun indent-guide-show ()
+  (interactive)
   (unless (or (indent-guide--active-overlays)
               (active-minibuffer-window))
     (let ((win-start (window-start))
-          (win-end (window-end))
+          (win-end (window-end nil t))
           line-col line-start line-end)
       ;; decide line-col, line-start
       (save-excursion
         (if (not (indent-guide--beginning-of-level))
+            ;; we couldn't find the beginning of this level, so assume it 0
             (setq line-col 0
                   line-start 1)
           (setq line-col (current-column)
                 line-start (max (1+ (line-number-at-pos))
-                                (line-number-at-pos win-start)))))
+                                (line-number-at-pos win-start))))
+        (when (and indent-guide-recursive (> line-col 0))
+          (indent-guide-show)))
       ;; decide line-end
       (save-excursion
         (while (and (progn (back-to-indentation)
@@ -220,11 +240,47 @@
         (setq line-end (line-number-at-pos)))
       ;; draw line
       (dotimes (tmp (- (1+ line-end) line-start))
-        (indent-guide--make-overlay (+ line-start tmp) line-col)))))
+        (indent-guide--make-overlay (+ line-start tmp) line-col))
+      (remove-overlays (point) (point) 'category 'indent-guide))))
 
 (defun indent-guide-remove ()
   (dolist (ov (indent-guide--active-overlays))
     (delete-overlay ov)))
+
+;; * minor-mode
+
+(defun indent-guide-post-command-hook ()
+  (if (null indent-guide-delay)
+      (indent-guide-show)
+    (when (null indent-guide--timer-object)
+      (setq indent-guide--timer-object
+            (run-with-idle-timer indent-guide-delay nil
+                                 (lambda ()
+                                   (indent-guide-show)
+                                   (setq indent-guide--timer-object nil)))))))
+
+(defun indent-guide-pre-command-hook ()
+  (indent-guide-remove))
+
+;;;###autoload
+(define-minor-mode indent-guide-mode
+  "show vertical lines to guide indentation"
+  :init-value nil
+  :lighter " ing"
+  :global nil
+  (if indent-guide-mode
+      (progn
+        (add-hook 'pre-command-hook 'indent-guide-pre-command-hook nil t)
+        (add-hook 'post-command-hook 'indent-guide-post-command-hook nil t))
+    (remove-hook 'pre-command-hook 'indent-guide-pre-command-hook t)
+    (remove-hook 'post-command-hook 'indent-guide-post-command-hook t)))
+
+;;;###autoload
+(define-globalized-minor-mode indent-guide-global-mode
+  indent-guide-mode
+  (lambda ()
+    (unless (memq major-mode indent-guide-inhibit-modes)
+      (indent-guide-mode 1))))
 
 ;; * provide
 

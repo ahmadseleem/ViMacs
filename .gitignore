@@ -2,3 +2,7 @@
 *.elc
 *.local~
 ido.last
+bookmarks
+.emacs.desktop
+.emacs.desktop.lock
+/my/*

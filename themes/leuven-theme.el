@@ -104,11 +104,11 @@ Semantic, and Ansi-Color faces are included -- and much more...")
    `(mode-line-buffer-id ((,class (:weight bold :foreground "white"))))
    `(mode-line-emphasis ((,class (:weight bold :foreground "white"))))
    `(mode-line-highlight ((,class (:foreground "yellow"))))
-   
+
    ;; vertical-border
    (set-face-attribute 'vertical-border nil :foreground "gray")
- 
-   
+
+
    ;; Escape and prompt faces
    `(minibuffer-prompt ((,class (:weight bold :foreground "black" :background "gold"))))
    `(minibuffer-noticeable-prompt ((,class (:weight bold :foreground "black" :background "gold"))))
@@ -119,13 +119,13 @@ Semantic, and Ansi-Color faces are included -- and much more...")
 
    ;; Font lock faces
    `(font-lock-builtin-face ((,class (:foreground "#006FE0"))))
-   `(font-lock-comment-delimiter-face ((,class (:foreground "#8D8D84")))) ; #696969
-   `(font-lock-comment-face ((,class (:slant italic :foreground "#8D8D84")))) ; #696969
+   `(font-lock-comment-delimiter-face ((,class (:foreground "#1E8AFB")))) ; #8D8D84
+   `(font-lock-comment-face ((,class (:slant italic :foreground "#1E8AFB")))) ; #696969
    `(font-lock-constant-face ((,class (:foreground "#D0372D"))))
    `(font-lock-doc-face ((,class (:foreground "#008000"))))
    `(font-lock-doc-string-face ((,class (:foreground "#008000"))))
-   `(font-lock-function-name-face ((,class (:weight normal :foreground "#006699"))))
-   `(font-lock-keyword-face ((,class (:bold nil :foreground "#0000FF")))) ; #3654DC
+   `(font-lock-function-name-face ((,class (:weight bold :foreground "#006699"))))
+   `(font-lock-keyword-face ((,class (:weight bold :foreground "#0000FF")))) ; #3654DC
    `(font-lock-preprocessor-face ((,class (:foreground "#808080"))))
    `(font-lock-regexp-grouping-backslash ((,class (:weight bold :inherit nil))))
    `(font-lock-regexp-grouping-construct ((,class (:weight bold :inherit nil))))
@@ -249,13 +249,13 @@ Semantic, and Ansi-Color faces are included -- and much more...")
    `(flyspell-incorrect ((,class (:underline "red" :inherit nil))))
 
    ;; ;; Semantic faces
-   ;; `(semantic-decoration-on-includes ((,class (:underline ,cham-4))))
-   ;; `(semantic-decoration-on-private-members-face ((,class (:background ,alum-2))))
-   ;; `(semantic-decoration-on-protected-members-face ((,class (:background ,alum-2))))
-   ;; `(semantic-decoration-on-unknown-includes ((,class (:background ,choc-3))))
-   ;; `(semantic-decoration-on-unparsed-includes ((,class (:underline ,orange-3))))
-   ;; `(semantic-tag-boundary-face ((,class (:overline ,blue-1))))
-   ;; `(semantic-unmatched-syntax-face ((,class (:underline ,red-1))))
+   `(semantic-decoration-on-includes ((,class (:underline ,"red"))))
+   `(semantic-decoration-on-private-members-face ((,class (:background ,"green"))))
+   `(semantic-decoration-on-protected-members-face ((,class (:background ,"green"))))
+   `(semantic-decoration-on-unknown-includes ((,class (:background ,"blue"))))
+   `(semantic-decoration-on-unparsed-includes ((,class (:underline ,"orange"))))
+   `(semantic-tag-boundary-face ((,class (:overline ,"blue-1"))))
+   `(semantic-unmatched-syntax-face ((,class (:underline ,"red-1"))))
 
    `(Info-title-1-face ((,class ,ol1)))
    `(Info-title-2-face ((,class ,ol2)))
