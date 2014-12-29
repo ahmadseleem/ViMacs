@@ -218,9 +218,10 @@
 (add-hook 'dired-mode-hook
           (lambda () (linum-mode 0)))
 
+;; Auto-Pair  built-in 24.4 .......................................
+(electric-pair-mode 1)
 
 ;; ................................................................
-
 (defun toggle-margin-right ()
   "Toggle the right margin between `fill-column' or window width.
 This command is convenient when reading novel, documentation."
