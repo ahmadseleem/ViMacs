@@ -6,3 +6,4 @@ bookmarks
 .emacs.desktop
 .emacs.desktop.lock
 /my/*
+/eshell/*
