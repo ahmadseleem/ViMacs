@@ -5,7 +5,9 @@ ViMacs
 
 > An Attempt to make Emacs with Evil ( Beautiful and Easy ) by collecting and and creating the best and simplest configuration.
 
-<br /> 
+<br />
+
+### (Pleaase, check: https://github.com/syl20bnr/spacemacs for a much more sphisticated Config!)
 
 #### = If you know Emacs Lisp well you can maintain this project or contribute…
 
