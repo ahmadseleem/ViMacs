@@ -7,7 +7,7 @@ ViMacs
 
 <br />
 
-### (Pleaase, check: https://github.com/syl20bnr/spacemacs for a much more sphisticated Config!)
+### (Pleaase, check: https://github.com/syl20bnr/spacemacs for a much more sophisticated Config!)
 
 #### = If you know Emacs Lisp well you can maintain this project or contribute…
 
