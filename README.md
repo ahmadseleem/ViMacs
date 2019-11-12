@@ -46,7 +46,7 @@ https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034
 #### - Our Focus Here:
 - Use Emacs as cool and easy as used vim.
 - Get the best out Evil-mode.
-- Fix defaults bugs to get it ready as used to use Vim.
+- Fix defaults bugs to get it ready as used to be in Vim.
 - Beatifull Emacs.
 - To polish some few modes of Emacs for development purposes.
 
@@ -56,7 +56,7 @@ https://gist.github.com/ahmadseleem/112793fbfa0da1fe3034
 
 -
 
-#### -tter TODO:
+#### - TODO:
 - beautify Emacs.
 - beautify Emacs.
 - beautify Emacs.
